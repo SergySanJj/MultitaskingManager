@@ -5,6 +5,7 @@ import java.lang.Process;
 import java.lang.ProcessBuilder;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.*;
 
 public class MultitaskManager {
     private MultitaskManager() {
@@ -74,7 +75,6 @@ public class MultitaskManager {
         }
 
         while (fProcess.isAlive() || gProcess.isAlive()) {
-
             try {
                 String word = fInBuffer.readLine();
                 System.out.println("output1 " + word);

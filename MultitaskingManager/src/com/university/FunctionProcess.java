@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.*;
 
 public class FunctionProcess {
     public static void main(String[] args) {
@@ -41,6 +42,7 @@ public class FunctionProcess {
 
         try {
             out.write(Double.toString(result));
+
             out.flush();
         } catch (Exception e) {
             e.printStackTrace();
