@@ -4,6 +4,7 @@ import spos.lab1.demo.DoubleOps;
 
 import javax.swing.*;
 import java.io.*;
+import java.lang.reflect.GenericDeclaration;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.*;
@@ -11,11 +12,7 @@ import java.nio.*;
 public class FunctionProcess {
     public static void main(String[] args) {
         String message;
-
-        functionCode = Integer.parseInt(args[0]);
-        x = Integer.parseInt(args[1]);
-        port = Integer.parseInt(args[2]);
-
+        port = Integer.parseInt(args[0]);
 
         try {
             mainServer = new Socket("localhost", port);
@@ -23,12 +20,6 @@ public class FunctionProcess {
             in = new BufferedReader(new InputStreamReader(mainServer.getInputStream()));
             out = new BufferedWriter(new OutputStreamWriter(mainServer.getOutputStream()));
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        try {
             result = Functions.run(functionCode, x);
         } catch (Exception e) {
             String errorMessage =
@@ -48,6 +39,10 @@ public class FunctionProcess {
             e.printStackTrace();
         }
 
+        endWork();
+    }
+
+    private static void endWork(){
         try {
             mainServer.close();
             in.close();
