@@ -18,11 +18,7 @@ public class Main {
 
 
     public static void main(String[] args) {
-        try {
-            Functions.run(0, 0);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         UserInterface ui = new UserInterface();
         ui.runManager();
     }

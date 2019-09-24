@@ -10,7 +10,13 @@ import java.util.Arrays;
 import java.util.ArrayList;
 
 public class Functions {
+
+    private Functions() {
+
+    }
+
     static {
+        functions = new ArrayList<FunctionManager>();
         addFunction(new F());
         addFunction(new G());
     }
@@ -20,7 +26,7 @@ public class Functions {
     public static void addFunction(FunctionManager f) {
         try {
             functions.add(f);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
