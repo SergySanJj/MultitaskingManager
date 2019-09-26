@@ -18,7 +18,7 @@ public class UserInterface {
 
             try {
                 manager.run(x);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {

@@ -30,9 +30,9 @@ public class MultitaskManager {
         MainServer mainServer = new MainServer();
         startProcesses(mainServer.getPort());
 
-        while (mainServer.isRunning()) {
-            mainServer.doTick();
-        }
+//        if (mainServer.isRunning()) {
+//            mainServer.doTick();
+//        }
 
         System.out.println();
     }

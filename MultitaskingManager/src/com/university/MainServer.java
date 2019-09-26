@@ -16,6 +16,8 @@ public class MainServer {
     MainServer() throws Exception {
         serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.bind(new InetSocketAddress(0));
+
+        // todo: init sockets
     }
 
     public void endServerWork() {
@@ -34,8 +36,8 @@ public class MainServer {
         tick++;
     }
 
-    boolean isRunning() {
-        return fSocketChannel.isOpen() || gSocketChannel.isOpen();
+    boolean isRunning() throws Exception{
+        return (fSocketChannel.isOpen() || gSocketChannel.isOpen());
     }
 
     private void acceptSocketChannels() throws Exception {
