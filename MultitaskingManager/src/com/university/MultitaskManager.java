@@ -30,12 +30,19 @@ public class MultitaskManager {
         MainServer mainServer = new MainServer();
         startProcesses(mainServer.getPort());
 
-//        if (mainServer.isRunning()) {
-//            mainServer.doTick();
-//        }
+        mainServer.acceptSocketChannels();
+        System.out.println("Channels accepted");
+
+        mainServer.sendFunctionCodes(0, 1);
+        System.out.println("Args sent");
+
+        while (fProcess.isAlive()){
+
+        }
 
         System.out.println();
     }
+
     private void startProcesses(int port) throws Exception {
         ProcessBuilder fProcessBuilder = createFunctionProcessBuilder(port);
         ProcessBuilder gProcessBuilder = createFunctionProcessBuilder(port);
