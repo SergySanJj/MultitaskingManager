@@ -13,9 +13,12 @@ import java.nio.charset.StandardCharsets;
 public class FunctionServer {
     public FunctionServer(int port) throws Exception {
         this.port = port;
-        //mainServer = new Socket("localhost", port);
         InetSocketAddress socketAddr = new InetSocketAddress("localhost", port);
         mainServer = SocketChannel.open(socketAddr);
+    }
+
+    public void listen() {
+
     }
 
     public int listenFunctionCode() throws Exception {

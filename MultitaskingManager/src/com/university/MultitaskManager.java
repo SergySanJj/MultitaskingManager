@@ -30,13 +30,17 @@ public class MultitaskManager {
         MainServer mainServer = new MainServer();
         startProcesses(mainServer.getPort());
 
-        mainServer.acceptSocketChannels();
-        System.out.println("Channels accepted");
+//        mainServer.acceptSocketChannels();
+//        System.out.println("Channels accepted");
 
-        mainServer.sendFunctionCodes(0, 1);
-        System.out.println("Args sent");
+        mainServer.manageSelector();
 
-        while (fProcess.isAlive()){
+
+
+        //mainServer.sendFunctionCodes(0, 1);
+        //System.out.println("Args sent");
+
+        while (fProcess.isAlive()) {
 
         }
 

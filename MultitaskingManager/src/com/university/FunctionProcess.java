@@ -1,5 +1,7 @@
 package com.university;
 
+import javax.swing.*;
+
 public class FunctionProcess {
     public static void main(String[] args) {
         String message;
@@ -12,6 +14,7 @@ public class FunctionProcess {
 
             result = Functions.run(functionCode, x);
         } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "error");
             e.printStackTrace();
         }
 
