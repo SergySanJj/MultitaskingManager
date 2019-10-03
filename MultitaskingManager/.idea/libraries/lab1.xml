@@ -2,6 +2,7 @@
   <library name="lab1">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/misc/lab1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/jnativehook-2.1.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

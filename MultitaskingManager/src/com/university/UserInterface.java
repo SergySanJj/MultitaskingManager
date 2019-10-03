@@ -1,8 +1,14 @@
 package com.university;
 
+import org.jnativehook.keyboard.NativeKeyEvent;
+import org.jnativehook.keyboard.NativeKeyListener;
 import spos.lab1.demo.DoubleOps;
 
+import javax.swing.*;
+import java.awt.event.KeyEvent;
 import java.util.Arrays;
+import java.util.EventListener;
+import java.util.EventListenerProxy;
 import java.util.Scanner;
 
 public class UserInterface {
@@ -28,4 +34,6 @@ public class UserInterface {
 
         System.out.println("Finishing..");
     }
+
+
 }
