@@ -12,9 +12,9 @@ import java.util.EventListenerProxy;
 import java.util.Scanner;
 
 public class UserInterface {
-
+    private MultitaskManager manager;
     public void runManager() {
-        MultitaskManager manager = new MultitaskManager(0, 1);
+        manager = new MultitaskManager(0, 1);
 
         int x;
         Scanner sc = new Scanner(System.in);
@@ -35,5 +35,7 @@ public class UserInterface {
         System.out.println("Finishing..");
     }
 
-
+    public void close(){
+        manager.close();
+    }
 }

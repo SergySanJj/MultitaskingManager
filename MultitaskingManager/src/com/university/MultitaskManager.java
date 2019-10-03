@@ -6,6 +6,12 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 
 public class MultitaskManager {
+
+    private int fCode, gCode;
+    private double fRes = 0.;
+    private double gRes = 0.;
+    private Process fProcess, gProcess;
+
     private MultitaskManager() {
     }
 
@@ -34,7 +40,6 @@ public class MultitaskManager {
 //        System.out.println("Channels accepted");
 
         mainServer.manageSelector();
-
 
 
         //mainServer.sendFunctionCodes(0, 1);
@@ -70,9 +75,7 @@ public class MultitaskManager {
         fProcess.destroy();
     }
 
-
-    private int fCode, gCode;
-    private double fRes = 0.;
-    private double gRes = 0.;
-    private Process fProcess, gProcess;
+    public void close() {
+        endProcesses();
+    }
 }

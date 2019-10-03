@@ -22,32 +22,34 @@ import com.university.MultitaskManager;
 import com.university.FunctionProcess;
 
 public class Main implements NativeKeyListener {
-    public void nativeKeyPressed(NativeKeyEvent e) {
-        //System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
+    private static UserInterface ui;
 
+    public void nativeKeyPressed(NativeKeyEvent e) {
         if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
             try {
                 GlobalScreen.unregisterNativeHook();
-            } catch (NativeHookException e1) {
-                //e1.printStackTrace();
+                ui.close();
+                System.exit(0);
+            } catch (Exception e1) {
+                e1.printStackTrace();
             }
         }
     }
 
     public void nativeKeyReleased(NativeKeyEvent e) {
-        //System.out.println("Key Released: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
     }
 
     public void nativeKeyTyped(NativeKeyEvent e) {
-        //System.out.println("Key Typed: " + e.getKeyText(e.getKeyCode()));
     }
 
-    public static void main(String[] args) {
+    public static void silentLogger() {
         Handler[] handlers = Logger.getLogger("").getHandlers();
         for (int i = 0; i < handlers.length; i++) {
             handlers[i].setLevel(Level.OFF);
         }
+    }
 
+    public static void handleEscape() {
         try {
             GlobalScreen.registerNativeHook();
         } catch (NativeHookException ex) {
@@ -57,10 +59,14 @@ public class Main implements NativeKeyListener {
             System.exit(1);
         }
 
-
         GlobalScreen.addNativeKeyListener(new Main());
+    }
 
-        UserInterface ui = new UserInterface();
+    public static void main(String[] args) {
+        silentLogger();
+        handleEscape();
+
+        ui = new UserInterface();
         ui.runManager();
     }
 }
