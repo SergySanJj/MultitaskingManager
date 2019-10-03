@@ -23,8 +23,6 @@ public class MainServer {
     MainServer() throws Exception {
         serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.bind(new InetSocketAddress(0));
-
-        // todo: init sockets
     }
 
     public void endServerWork() {

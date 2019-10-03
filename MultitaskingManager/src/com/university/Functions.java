@@ -1,12 +1,7 @@
 package com.university;
 
-import spos.lab1.demo.DoubleOps;
+import com.university.functions.wrappers.*;
 
-import com.university.F;
-import com.university.G;
-import com.university.FunctionManager;
-
-import java.util.Arrays;
 import java.util.ArrayList;
 
 public class Functions {
@@ -19,6 +14,8 @@ public class Functions {
         functions = new ArrayList<FunctionManager>();
         addFunction(new F());
         addFunction(new G());
+        addFunction(new FTest());
+        addFunction(new GTest());
     }
 
     private static ArrayList<FunctionManager> functions;
@@ -34,6 +31,4 @@ public class Functions {
     public static double run(int functionCode, int x) throws Exception {
         return functions.get(functionCode).run(x);
     }
-
-
 }
