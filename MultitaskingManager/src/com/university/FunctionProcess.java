@@ -16,26 +16,11 @@ public class FunctionProcess {
 
         try {
             functionServer = new FunctionServer(port);
-            functionCode = functionServer.listenFunctionCode();
-            x = functionServer.listenArgument();
-
-            new Thread(() -> {
-                try {
-                    runFunction();
-                } catch (Exception e) {
-
-                }
-            }).start();
-
+            functionServer.start();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "error");
             e.printStackTrace();
         }
 
         functionServer.endWork();
-    }
-
-    private static void runFunction() throws Exception {
-        result = Functions.run(functionCode, x);
     }
 }
