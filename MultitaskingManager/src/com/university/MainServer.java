@@ -7,54 +7,86 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Stack;
+import java.util.function.Function;
 
 public class MainServer {
     private int tick = 0;
     private ServerSocketChannel serverSocketChannel;
-    private SocketChannel fSocketChannel, gSocketChannel;
+    private ArrayList<FunctionChannel> socketChannels;
     private Selector selector;
+    private MultitaskManager parentManager;
+    private Stack<FunctionArgs> functionArgs;
+
+    MainServer(MultitaskManager parent, int x) throws Exception {
+        parentManager = parent;
+        serverSocketChannel = ServerSocketChannel.open();
+        serverSocketChannel.bind(new InetSocketAddress(0));
+        socketChannels = new ArrayList<>();
+        functionArgs = new Stack<>();
+        functionArgs.push(new FunctionArgs(0, x));
+        functionArgs.push(new FunctionArgs(1, x));
+    }
 
     public int getPort() {
         return serverSocketChannel.socket().getLocalPort();
     }
 
-    MainServer() throws Exception {
-        serverSocketChannel = ServerSocketChannel.open();
-        serverSocketChannel.bind(new InetSocketAddress(0));
-    }
-
     public void endServerWork() {
         try {
             serverSocketChannel.close();
-            fSocketChannel.close();
-            gSocketChannel.close();
+            for (FunctionChannel channel : socketChannels)
+                channel.channel.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void doTick() throws InterruptedException {
-        Thread.sleep(100);
-        System.out.print("\rwaiting.. x" + Integer.toString(tick));
-        tick++;
-    }
-
     boolean isRunning() {
         try {
-            return (fSocketChannel.isOpen() || gSocketChannel.isOpen());
+            for (FunctionChannel channel : socketChannels)
+                if (channel.channel.isOpen())
+                    return true;
+            return false;
         } catch (Exception e) {
             return false;
         }
     }
 
-    public void acceptSocketChannels() throws Exception {
-        while (fSocketChannel == null || gSocketChannel == null) {
-            if (fSocketChannel == null)
-                fSocketChannel = serverSocketChannel.accept();
-            if (gSocketChannel == null)
-                gSocketChannel = serverSocketChannel.accept();
+    class FunctionArgs {
+        public int x;
+        public int functionCode;
+
+        FunctionArgs(int functionCode, int x) {
+            this.functionCode = functionCode;
+            this.x = x;
+        }
+
+        public String commandX() {
+            return "x" + Integer.toString(x);
+        }
+
+        public String commandFunction() {
+            return "f" + Integer.toString(x);
+        }
+    }
+
+    class FunctionChannel {
+        private SocketChannel channel;
+        public FunctionArgs fargs;
+        public boolean hasX;
+        public boolean hasFunctionCode;
+
+        FunctionChannel(SocketChannel channel, FunctionArgs fargs) {
+            this.channel = channel;
+            this.fargs = fargs;
+        }
+
+        public SocketChannel socketChannel() {
+            return channel;
         }
     }
 
@@ -63,10 +95,7 @@ public class MainServer {
         serverSocketChannel.configureBlocking(false);
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
-        final ByteBuffer msg = ByteBuffer.wrap("Hi!\r\n".getBytes());
-
         while (true) {
-
             // Waits for new events to process; blocks until the next incoming event
             selector.select();
 
@@ -82,12 +111,15 @@ public class MainServer {
                         ServerSocketChannel server = (ServerSocketChannel) key.channel();
 
                         SocketChannel client = server.accept();
+                        socketChannels.add(new FunctionChannel(client, functionArgs.pop()));
                         client.configureBlocking(false);
                         // Accepts client and registers it with the selector
                         client.register(
-                                selector, SelectionKey.OP_WRITE | SelectionKey.OP_READ, msg);
+                                selector, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
                         System.out.println("Accepted connection from " + client);
                     }
+                    // todo: here
+                    
                     // Checks if the socket is ready for writing data
                     if (key.isWritable()) {
                         SocketChannel client = (SocketChannel) key.channel();
@@ -113,11 +145,6 @@ public class MainServer {
 
     }
 
-    public void sendFunctionCodes(int fCode, int gCode) throws Exception {
-        sendFunctionCode(fCode, fSocketChannel);
-        sendFunctionCode(gCode, gSocketChannel);
-    }
-
     private void sendFunctionCode(int functionCode, SocketChannel channel) throws Exception {
         ByteBuffer buf = ByteBuffer.allocate(48);
         buf.clear();
@@ -126,9 +153,5 @@ public class MainServer {
         while (buf.hasRemaining()) {
             channel.write(buf);
         }
-    }
-
-    public void sendFunctionArgument(int x) {
-
     }
 }

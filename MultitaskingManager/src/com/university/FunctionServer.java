@@ -7,50 +7,61 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import static java.nio.ByteBuffer.allocate;
+import static java.nio.channels.SelectionKey.*;
 
 public class FunctionServer {
     private static int port;
 
-    private SocketChannel mainServer;
-    private BufferedReader in;
-    private BufferedWriter out;
-
+    private ByteBuffer buffer = allocate(16);
     private Selector selector;
     private SocketChannel channel;
 
-    public FunctionServer(int port) throws Exception {
+    BlockingQueue<String> queue = new ArrayBlockingQueue<>(2);
+
+    public FunctionServer(int port) {
         this.port = port;
-        InetSocketAddress socketAddr = new InetSocketAddress("localhost", port);
-        mainServer = SocketChannel.open(socketAddr);
     }
 
-    public void listen() throws Exception {
-        selector = Selector.open();
+    public void start() throws Exception {
+        channel = SocketChannel.open();
         channel.configureBlocking(false);
+        selector = Selector.open();
         //todo: here
-    }
+        channel.register(selector, OP_CONNECT);
+        channel.connect(new InetSocketAddress("localhost", port));
 
-    public int listenFunctionCode() throws Exception {
-        ByteBuffer buf = ByteBuffer.allocate(48);
-        buf.clear();
-        mainServer.read(buf);
-        String v = new String(buf.array(), "ASCII");
-        JOptionPane.showMessageDialog(null, v);
-        return Integer.parseInt(buf.toString());
-    }
-
-    public int listenArgument() {
-        return 0;
+        while (true) {
+            selector.select();
+            for (SelectionKey selectionKey : selector.selectedKeys()) {
+                if (selectionKey.isConnectable()) {
+                    channel.finishConnect();
+                    selectionKey.interestOps(OP_WRITE);
+                } else if (selectionKey.isReadable()) {
+                    buffer.clear();
+                    channel.read(buffer);
+                    System.out.println("Recieved = " + new String(buffer.array()));
+                } else if (selectionKey.isWritable()) {
+                    String line = queue.poll();
+                    if (line != null) {
+                        channel.write(ByteBuffer.wrap(line.getBytes()));
+                    }
+                    selectionKey.interestOps(OP_READ);
+                }
+            }
+        }
     }
 
     public void endWork() {
         try {
-            mainServer.close();
-            in.close();
-            out.close();
+            channel.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

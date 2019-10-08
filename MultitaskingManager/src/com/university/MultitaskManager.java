@@ -8,9 +8,9 @@ import java.nio.channels.ServerSocketChannel;
 public class MultitaskManager {
 
     private int fCode, gCode;
-    private double fRes = 0.;
-    private double gRes = 0.;
+    private double[] results;
     private Process fProcess, gProcess;
+    MainServer mainServer;
 
     private MultitaskManager() {
     }
@@ -18,10 +18,15 @@ public class MultitaskManager {
     public MultitaskManager(int fCode, int gCode) {
         this.fCode = fCode;
         this.gCode = gCode;
+        results = new double[2];
+    }
+
+    public void setFunctionResult(int functionNumber, double result) {
+        results[functionNumber] = result;
     }
 
     public void run(int x) throws Exception {
-        MainServer mainServer = new MainServer();
+        mainServer = new MainServer(this, x);
 
         startProcesses(mainServer.getPort());
         startServer();
@@ -32,23 +37,9 @@ public class MultitaskManager {
         endProcesses();
     }
 
-    public void startServer() throws Exception {
-        MainServer mainServer = new MainServer();
+    private void startServer() throws Exception {
         startProcesses(mainServer.getPort());
-
-//        mainServer.acceptSocketChannels();
-//        System.out.println("Channels accepted");
-
         mainServer.manageSelector();
-
-
-        //mainServer.sendFunctionCodes(0, 1);
-        //System.out.println("Args sent");
-
-        while (fProcess.isAlive()) {
-
-        }
-
         System.out.println();
     }
 
@@ -58,7 +49,6 @@ public class MultitaskManager {
 
         fProcess = fProcessBuilder.start();
         gProcess = gProcessBuilder.start();
-
     }
 
     private ProcessBuilder createFunctionProcessBuilder(int port) {
