@@ -11,18 +11,45 @@ public class MultitaskManager {
     private double[] results;
     private Process fProcess, gProcess;
     MainServer mainServer;
+    UserInterface parentUI;
 
     private MultitaskManager() {
     }
 
-    public MultitaskManager(int fCode, int gCode) {
+    public MultitaskManager(UserInterface parentUI, int fCode, int gCode) {
         this.fCode = fCode;
         this.gCode = gCode;
-        results = new double[2];
+        this.parentUI = parentUI;
+        results = new double[]{0.0, 0.0};
     }
 
-    public void setFunctionResult(int functionNumber, double result) {
-        results[functionNumber] = result;
+    public void setFunctionResult(int functionNumber, String result) {
+        String[] fRes = StrFunc.parseNumValues(result);
+        if (fRes[0].equals("1")) {
+            results[functionNumber] = Integer.parseInt(fRes[1]);
+            if (Math.abs(results[functionNumber]) < Double.MIN_VALUE) {
+                parentUI.pollZero();
+            }
+        }
+        if (checkResultReadines()) {
+            parentUI.pollResult(operationRes());
+        }
+    }
+
+    private boolean checkResultReadines() {
+        for (double el : results) {
+            if (el == 0.0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private double operationRes() {
+        double res = 1;
+        for (double el : results)
+            res *= el;
+        return res;
     }
 
     public void run(int x) throws Exception {
@@ -38,7 +65,6 @@ public class MultitaskManager {
     }
 
     private void startServer() throws Exception {
-        startProcesses(mainServer.getPort());
         mainServer.manageSelector();
         System.out.println();
     }
@@ -53,6 +79,7 @@ public class MultitaskManager {
 
     private ProcessBuilder createFunctionProcessBuilder(int port) {
         String[] startOptions = new String[]{
+                "cmd", "/c", "start", "cmd", "/k",
                 "java",
                 "-cp", System.getProperty("java.class.path", "."), FunctionProcess.class.getName(),
                 Integer.toString(port), "END"

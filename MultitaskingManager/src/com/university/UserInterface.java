@@ -12,6 +12,7 @@ import java.util.EventListenerProxy;
 import java.util.Scanner;
 
 public class UserInterface {
+
     private MultitaskManager manager;
     private final int maxIdleTime = 1000;
     private int x;
@@ -45,12 +46,13 @@ public class UserInterface {
             }
             if (currentState == Ccancel) {
                 System.out.println("Finishing..");
+                manager.close();
                 System.exit(0);
             }
         });
         inputThread.start();
 
-        while(inputThread.isAlive() || runnerThread.isAlive()){
+        while (inputThread.isAlive() || runnerThread.isAlive()) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -70,22 +72,33 @@ public class UserInterface {
         boolean inputed = false;
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter x:");
-        while (!inputed) {
-            if (sc.hasNextInt()) {
-                x = sc.nextInt();
+        do {
+            try {
+                String str = sc.next();
+                x = Integer.parseInt(str);
                 inputed = true;
-            } else {
+            } catch (Exception e) {
                 System.out.println("x must be an int value");
             }
-        }
+        } while (!inputed);
     }
 
-    public void bladeRunner(){
-        manager = new MultitaskManager(0, 1);
+    public void bladeRunner() {
+        manager = new MultitaskManager(this, 0, 1);
         try {
             manager.run(x);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void pollZero() {
+        System.out.println("Result: 0.0");
+        System.exit(0);
+    }
+
+    public void pollResult(double res) {
+        System.out.println("Result: " + Double.toString(res));
+        System.exit(0);
     }
 }
