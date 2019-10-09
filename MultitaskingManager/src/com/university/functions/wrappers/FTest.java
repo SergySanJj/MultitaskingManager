@@ -27,6 +27,10 @@ public class FTest implements FunctionManager {
             hang();
             return 1.0;
         }
+        if (x == 7) {
+            Thread.sleep(6000);
+            return 10.0;
+        }
         return 1.0;
     }
 

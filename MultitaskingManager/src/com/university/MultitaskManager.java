@@ -3,6 +3,7 @@ package com.university;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Timer;
 
 public class MultitaskManager {
 
@@ -11,6 +12,8 @@ public class MultitaskManager {
     private Process fProcess, gProcess;
     MainServer mainServer;
     UserInterface parentUI;
+    public long time;
+
 
     private MultitaskManager() {
     }
@@ -26,7 +29,8 @@ public class MultitaskManager {
         String[] fRes = StrFunc.parseNumValues(result);
         if (fRes[0].equals("1")) {
             double res = Double.parseDouble(fRes[1]);
-            System.out.println(fRes[1]);
+            if (Settings.echo)
+                System.out.println(fRes[1]);
             results.add((Double.toString(res)));
             if (Math.abs(res) < 1E-12) {
                 parentUI.pollZero();
@@ -60,6 +64,7 @@ public class MultitaskManager {
     public void run(int x) throws Exception {
         mainServer = new MainServer(this, fCode, gCode, x);
 
+        time = System.nanoTime();
         startProcesses(mainServer.getPort());
         startServer();
     }

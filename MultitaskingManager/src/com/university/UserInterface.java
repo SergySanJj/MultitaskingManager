@@ -92,12 +92,13 @@ public class UserInterface {
         isResultReady = true;
         while (isCurrentlyPrompted) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
         System.out.println("Result: " + res);
+        System.out.println("Total time: " + (System.nanoTime() - manager.time) / 1000000000.0 + " s");
         manager.close();
         System.exit(0);
     }

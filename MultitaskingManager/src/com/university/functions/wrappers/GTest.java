@@ -28,6 +28,10 @@ public class GTest implements FunctionManager {
         if (x == 6) {
             throw new Exception();
         }
+        if (x == 7) {
+            Thread.sleep(10000);
+            return 11.0;
+        }
         return 1.0;
     }
 
