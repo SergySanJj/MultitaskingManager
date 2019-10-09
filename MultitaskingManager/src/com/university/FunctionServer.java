@@ -17,7 +17,7 @@ public class FunctionServer {
     private static int port;
     private Selector selector;
     private SocketChannel channel;
-    String msg;
+    private String msg;
     private int functionCode, x;
 
     public FunctionServer(int port) {

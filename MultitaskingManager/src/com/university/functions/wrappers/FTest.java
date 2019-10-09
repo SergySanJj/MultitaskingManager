@@ -13,7 +13,7 @@ public class FTest implements FunctionManager {
             return 10.0;
         }
         if (x == 3) {
-            return 1E-12;
+            return 1E-14;
         }
         if (x == 4) {
             hang();
