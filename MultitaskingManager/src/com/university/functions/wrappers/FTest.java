@@ -7,25 +7,33 @@ public class FTest implements FunctionManager {
         if (x == 0)
             return 2.0;
         if (x == 1)
-            return 0.0;
+            return 10.0;
         if (x == 2) {
-            Thread.sleep(2000);
-            return 2.0;
+            Thread.sleep(1000);
+            return 10.0;
         }
         if (x == 3) {
-            Thread.sleep(1000);
-            return 0.0;
+            return 1E-12;
         }
         if (x == 4) {
-            int i = 0;
-            while (i > -1) {
-                i = (i + 1) % 10;
-            }
+            hang();
             return 1.0;
         }
         if (x == 5) {
-            throw new Exception();
+            Thread.sleep(1000);
+            return 10.0;
+        }
+        if (x == 6) {
+            hang();
+            return 1.0;
         }
         return 1.0;
+    }
+
+    public void hang() {
+        int i = 0;
+        while (i > -1) {
+            i = (i + 1) % 10;
+        }
     }
 }

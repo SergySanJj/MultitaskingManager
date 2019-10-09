@@ -1,43 +1,27 @@
 package com.university;
 
-import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
-import static java.lang.Character.isDigit;
-import static java.nio.ByteBuffer.allocate;
 import static java.nio.channels.SelectionKey.*;
-
-import static com.university.StrFunc.*;
 
 public class FunctionServer {
     private static int port;
-
     private Selector selector;
     private SocketChannel channel;
-
     String msg;
     private int functionCode, x;
 
-    BlockingQueue<String> queue = new ArrayBlockingQueue<>(2);
-
     public FunctionServer(int port) {
-        this.port = port;
+        FunctionServer.port = port;
     }
 
     public void start() throws Exception {
@@ -75,7 +59,7 @@ public class FunctionServer {
 
     private void write() throws IOException {
         if (msg != null) {
-            ByteBuffer buff = ByteBuffer.allocate(32);
+            ByteBuffer buff = ByteBuffer.allocate(256);
             CharBuffer cbuff = buff.asCharBuffer();
             cbuff.put(msg);
             cbuff.flip();
@@ -89,11 +73,11 @@ public class FunctionServer {
 
 
     private void read(SelectionKey selectionKey) throws IOException {
-        ByteBuffer buffer = ByteBuffer.allocate(32);
+        ByteBuffer buffer = ByteBuffer.allocate(256);
         CharBuffer cbuff = buffer.asCharBuffer();
 
-        int numRead = channel.read(buffer);
-        if (buffer.equals(ByteBuffer.allocate(32).clear()))
+        channel.read(buffer);
+        if (buffer.equals(ByteBuffer.allocate(256).clear()))
             return;
         String fargs = cbuff.toString();
 
@@ -128,7 +112,7 @@ public class FunctionServer {
     private void startProcessing() {
         try {
             double res = runFunction(functionCode, x);
-            msg = "1 " + Double.toString(res);
+            msg = "1 " + String.format("%.12f", res);
         } catch (Exception e) {
             msg = "0 -1.0";
         }

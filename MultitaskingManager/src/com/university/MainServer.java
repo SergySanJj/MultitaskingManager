@@ -8,7 +8,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
@@ -17,24 +16,21 @@ import java.util.Stack;
 import static java.nio.channels.SelectionKey.OP_READ;
 import static java.nio.channels.SelectionKey.OP_WRITE;
 
-import static com.university.StrFunc.*;
-
 public class MainServer {
-    private int tick = 0;
     private ServerSocketChannel serverSocketChannel;
     private ArrayList<FunctionChannel> functionChannels;
     private Selector selector;
     private MultitaskManager parentManager;
     private Stack<FunctionArgs> functionArgs;
 
-    MainServer(MultitaskManager parent, int x) throws Exception {
+    MainServer(MultitaskManager parent, int fCode, int gCode, int x) throws Exception {
         parentManager = parent;
         serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.bind(new InetSocketAddress(0));
         functionChannels = new ArrayList<>();
         functionArgs = new Stack<>();
-        functionArgs.push(new FunctionArgs(0, x));
-        functionArgs.push(new FunctionArgs(1, x));
+        functionArgs.push(new FunctionArgs(fCode, x));
+        functionArgs.push(new FunctionArgs(gCode, x));
     }
 
     public int getPort() {
@@ -87,6 +83,7 @@ public class MainServer {
                     try {
                         key.channel().close();
                     } catch (IOException e1) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -95,7 +92,7 @@ public class MainServer {
     }
 
     private void read(SelectionKey key) throws IOException {
-        ByteBuffer buff = ByteBuffer.allocate(32);
+        ByteBuffer buff = ByteBuffer.allocate(256);
         CharBuffer cbuff = buff.asCharBuffer();
         SocketChannel socketChannel = (SocketChannel) key.channel();
 
@@ -107,7 +104,8 @@ public class MainServer {
         String res = cbuff.toString();
         for (FunctionChannel functionChannel : functionChannels) {
             if (functionChannel.channel.equals(socketChannel)) {
-                System.out.println("Recieved " + res);
+                if (Settings.echo)
+                    System.out.println("Recieved " + res);
                 parentManager.setFunctionResult(functionChannel.fargs.functionCode, res);
             }
         }
@@ -119,7 +117,7 @@ public class MainServer {
         for (FunctionChannel functionChannel : functionChannels) {
             if (functionChannel.channel.equals(client)) {
                 if (!functionChannel.passedArgs) {
-                    ByteBuffer buff = ByteBuffer.allocate(32);
+                    ByteBuffer buff = ByteBuffer.allocate(256);
                     CharBuffer cbuff = buff.asCharBuffer();
                     cbuff.put(functionChannel.fargs.command());
                     cbuff.flip();
@@ -129,7 +127,8 @@ public class MainServer {
                         System.out.println("Buffer cap info");
                         break;
                     }
-                    System.out.println("Function info " + cbuff.toString() + " sent");
+                    if (Settings.echo)
+                        System.out.println("Function info " + cbuff.toString() + " sent");
 
                     functionChannel.passedArgs = true;
                 }
@@ -148,7 +147,8 @@ public class MainServer {
         functionChannels.add(new FunctionChannel(client, fargs));
         client.configureBlocking(false);
         client.register(selector, OP_WRITE);
-        System.out.println("Accepted connection from " + client);
+        if (Settings.echo)
+            System.out.println("Accepted connection from " + client);
     }
 
     class FunctionArgs {
