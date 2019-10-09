@@ -20,13 +20,17 @@ public class UserInterface {
         Thread runnerThread = new Thread(() -> startManager(fCode, gCode));
         runnerThread.start();
 
-        Thread inputThread = new Thread(this::startUserPrompt);
-        inputThread.start();
-
-        while (inputThread.isAlive() || runnerThread.isAlive()) {
+        Thread inputThread;
+        if (Settings.usePrompts) {
+            inputThread = new Thread(this::startUserPrompt);
+            inputThread.start();
+        }
+        try {
+            runnerThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        System.out.println("Finishing..");
         System.exit(0);
     }
 
@@ -75,7 +79,7 @@ public class UserInterface {
         } while (!inputed);
     }
 
-    public void startManager(int fCode, int gCode) {
+    private void startManager(int fCode, int gCode) {
         manager = new MultitaskManager(this, fCode, gCode);
         try {
             manager.run(x);
@@ -89,6 +93,7 @@ public class UserInterface {
     }
 
     public void pollResult(String res) {
+        double workedFor = (System.nanoTime() - manager.time()) / 1000000000.0;
         isResultReady = true;
         while (isCurrentlyPrompted) {
             try {
@@ -98,7 +103,7 @@ public class UserInterface {
             }
         }
         System.out.println("Result: " + res);
-        System.out.println("Total time: " + (System.nanoTime() - manager.time) / 1000000000.0 + " s");
+        System.out.println("Total time: " + workedFor + " s");
         manager.close();
         System.exit(0);
     }

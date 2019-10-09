@@ -35,7 +35,7 @@ public class GTest implements FunctionManager {
         return 1.0;
     }
 
-    public void hang() {
+    private void hang() {
         int i = 0;
         while (i > -1) {
             i = (i + 1) % 10;

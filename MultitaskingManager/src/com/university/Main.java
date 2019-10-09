@@ -12,6 +12,14 @@ import java.util.logging.Logger;
 public class Main implements NativeKeyListener {
     private static UserInterface ui;
 
+    public static void main(String[] args) {
+        silentLogger();
+        handleEscape();
+
+        ui = new UserInterface();
+        ui.runManager(2, 3);
+    }
+
     public void nativeKeyPressed(NativeKeyEvent e) {
         if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
             try {
@@ -49,13 +57,5 @@ public class Main implements NativeKeyListener {
         }
 
         GlobalScreen.addNativeKeyListener(new Main());
-    }
-
-    public static void main(String[] args) {
-        silentLogger();
-        handleEscape();
-
-        ui = new UserInterface();
-        ui.runManager(2, 3);
     }
 }

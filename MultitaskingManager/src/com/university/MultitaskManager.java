@@ -10,10 +10,9 @@ public class MultitaskManager {
     private int fCode, gCode;
     private ArrayList<String> results;
     private Process fProcess, gProcess;
-    MainServer mainServer;
-    UserInterface parentUI;
-    public long time;
-
+    private MainServer mainServer;
+    private UserInterface parentUI;
+    private long time;
 
     private MultitaskManager() {
     }
@@ -51,7 +50,7 @@ public class MultitaskManager {
         double res = 1;
         boolean hasNaN = false;
         for (String el : results) {
-            if (el == "NaN")
+            if (el.equals("NaN"))
                 hasNaN = true;
             else
                 res *= Double.parseDouble(el);
@@ -121,5 +120,9 @@ public class MultitaskManager {
         for (String el : results)
             s.append(el).append(" ");
         return results.size() + " Functions finished executuon with values: " + s.toString();
+    }
+
+    public long time() {
+        return this.time;
     }
 }
