@@ -13,14 +13,28 @@ public class UserInterface {
     private boolean isCurrentlyPrompted = false;
     private boolean isResultReady = false;
     private int currentState = Ccontinue;
+    private boolean finished = false;
+
+    private Thread inputThread;
+    private Thread runnerThread;
+
+    private Runner parent;
+
+    public boolean finished(){
+        return finished;
+    }
+
+    UserInterface(Runner parent){
+        this.parent = parent;
+    }
 
     public void runManager(int fCode, int gCode) {
         inputX();
 
-        Thread runnerThread = new Thread(() -> startManager(fCode, gCode));
+        runnerThread = new Thread(() -> startManager(fCode, gCode));
         runnerThread.start();
 
-        Thread inputThread;
+
         if (Settings.usePrompts) {
             inputThread = new Thread(this::startUserPrompt);
             inputThread.start();
@@ -31,12 +45,13 @@ public class UserInterface {
             e.printStackTrace();
         }
 
-        System.exit(0);
+        restart();
+        //System.exit(0);
     }
 
     private void startUserPrompt() {
         Scanner sc = new Scanner(System.in);
-        while (currentState != Ccancel && currentState != CwithoutPrompt) {
+        while (currentState != Ccancel && currentState != CwithoutPrompt && !finished) {
             try {
                 Thread.sleep(Settings.maxIdleTime);
             } catch (Exception e) {
@@ -56,7 +71,14 @@ public class UserInterface {
             System.out.println("Canceling..");
             System.out.println(manager.getStatus());
             manager.close();
-            System.exit(0);
+            restart();
+            //System.exit(0);
+        }
+        if (currentState == Ccancel){
+            System.out.println("Canceling..");
+            System.out.println(manager.getStatus());
+            manager.close();
+            restart();
         }
     }
 
@@ -105,6 +127,15 @@ public class UserInterface {
         System.out.println("Result: " + res);
         System.out.println("Total time: " + workedFor + " s");
         manager.close();
-        System.exit(0);
+        //System.exit(0);
+        restart();
+    }
+
+    public void restart(){
+        inputThread.stop();
+        runnerThread.stop();
+        finished = true;
+        //parent.retry();
+        //System.exit(0);
     }
 }

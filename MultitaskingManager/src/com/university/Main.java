@@ -9,23 +9,51 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+class Runner {
+    private UserInterface ui;
+
+    public void run() {
+        ui = new UserInterface(this);
+        ui.runManager(2, 3);
+    }
+
+    public boolean finished() {
+        return ui.finished();
+    }
+}
+
 public class Main implements NativeKeyListener {
     private static UserInterface ui;
+
+    public static void run() {
+        Runner runner = new Runner();
+        while (true) {
+            runner.run();
+            while (!runner.finished()) {
+                try {
+                    Thread.sleep(100);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
 
     public static void main(String[] args) {
         silentLogger();
         handleEscape();
 
-        ui = new UserInterface();
-        ui.runManager(2, 3);
+        run();
     }
+
 
     public void nativeKeyPressed(NativeKeyEvent e) {
         if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
             try {
                 System.out.println("Finishing..");
                 GlobalScreen.unregisterNativeHook();
-                ui.close();
+                //ui.close();
                 System.exit(0);
             } catch (Exception e1) {
                 e1.printStackTrace();
