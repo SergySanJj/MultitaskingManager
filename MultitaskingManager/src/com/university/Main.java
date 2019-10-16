@@ -27,7 +27,6 @@ class Runner {
 
     public void forceFinish() {
         ui.printCurrentStatus();
-        ui.close();
     }
 
     public void restart() {
@@ -71,10 +70,8 @@ public class Main implements NativeKeyListener {
         if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
             try {
                 System.out.println("User pressed Esc");
-                //GlobalScreen.unregisterNativeHook();
-
                 runner.forceFinish();
-                //System.exit(0);
+                runner.restart();
             } catch (Exception e1) {
                 e1.printStackTrace();
             }

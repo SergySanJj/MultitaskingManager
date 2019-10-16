@@ -9,6 +9,8 @@ public class FunctionProcess {
     public static void main(String[] args) {
         port = Integer.parseInt(args[0]);
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> System.exit(0)));
+
         try {
             functionServer = new FunctionServer(port);
             functionServer.start();

@@ -99,7 +99,11 @@ public class MultitaskManager {
     }
 
     private void killProcess(Process process) {
-        process.destroy();
+        if (process == null)
+            return;
+        if (process.isAlive())
+            process.destroy();
+        else return;
         if (!process.isAlive())
             return;
         long tokill = process.pid();

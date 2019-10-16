@@ -20,11 +20,11 @@ public class UserInterface {
 
     private Runner parent;
 
-    public boolean finished(){
+    public boolean finished() {
         return finished;
     }
 
-    UserInterface(Runner parent){
+    UserInterface(Runner parent) {
         this.parent = parent;
     }
 
@@ -41,7 +41,8 @@ public class UserInterface {
         try {
             runnerThread.join();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
+            return;
         }
 
         restart();
@@ -53,7 +54,8 @@ public class UserInterface {
             try {
                 Thread.sleep(Settings.maxIdleTime);
             } catch (Exception e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
+                return;
             }
             System.out.println("Functions running for too long, options: \n" +
                     "continue(1)\n" +
@@ -73,16 +75,17 @@ public class UserInterface {
         }
     }
 
-    public void printCurrentStatus(){
+    public void printCurrentStatus() {
         System.out.println(manager.getStatus());
     }
 
     public void close() {
-        manager.close();
+        if (manager != null)
+            manager.close();
         if (inputThread != null && inputThread.isAlive())
-            inputThread.stop();
+            inputThread.interrupt();
         if (runnerThread != null && runnerThread.isAlive())
-            runnerThread.stop();
+            runnerThread.interrupt();
         finished = true;
     }
 
@@ -121,7 +124,8 @@ public class UserInterface {
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
+                return;
             }
         }
         System.out.println("Result: " + res);
@@ -130,7 +134,7 @@ public class UserInterface {
         restart();
     }
 
-    public void restart(){
+    public void restart() {
         finished = true;
         parent.restart();
     }
