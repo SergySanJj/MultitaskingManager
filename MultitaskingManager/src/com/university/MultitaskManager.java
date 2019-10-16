@@ -1,9 +1,7 @@
 package com.university;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Timer;
 
 public class MultitaskManager {
 
@@ -13,9 +11,6 @@ public class MultitaskManager {
     private MainServer mainServer;
     private UserInterface parentUI;
     private long time;
-
-    private MultitaskManager() {
-    }
 
     public MultitaskManager(UserInterface parentUI, int fCode, int gCode) {
         this.fCode = fCode;
@@ -101,17 +96,8 @@ public class MultitaskManager {
     private void killProcess(Process process) {
         if (process == null)
             return;
-        if (process.isAlive())
-            process.destroy();
-        else return;
-        if (!process.isAlive())
-            return;
-        long tokill = process.pid();
-        String cmd = "taskkill /F /PID " + tokill;
-        try {
-            Runtime.getRuntime().exec(cmd);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (process.isAlive()) {
+            process.destroyForcibly();
         }
     }
 

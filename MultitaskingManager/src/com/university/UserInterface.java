@@ -6,9 +6,9 @@ public class UserInterface {
 
     private MultitaskManager manager;
     private int x;
-    private final int Ccontinue = 1;
-    private final int CwithoutPrompt = 2;
-    private final int Ccancel = 3;
+    private static final int Ccontinue = 1;
+    private static final int CwithoutPrompt = 2;
+    private static final int Ccancel = 3;
 
     private boolean isCurrentlyPrompted = false;
     private boolean isResultReady = false;
@@ -76,7 +76,8 @@ public class UserInterface {
     }
 
     public void printCurrentStatus() {
-        System.out.println(manager.getStatus());
+        if (manager != null)
+            System.out.println(manager.getStatus());
     }
 
     public void close() {

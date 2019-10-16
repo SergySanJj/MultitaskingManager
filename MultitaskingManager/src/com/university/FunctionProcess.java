@@ -1,7 +1,5 @@
 package com.university;
 
-import javax.swing.*;
-
 public class FunctionProcess {
     private static int port;
     private static FunctionServer functionServer;

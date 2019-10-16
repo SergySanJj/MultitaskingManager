@@ -11,7 +11,7 @@ public class Functions {
     }
 
     static {
-        functions = new ArrayList<FunctionManager>();
+        functions = new ArrayList<>();
         addFunction(new F());
         addFunction(new G());
         addFunction(new FTest());

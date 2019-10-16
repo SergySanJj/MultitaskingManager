@@ -6,7 +6,6 @@ import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 
 import java.util.Scanner;
-import java.util.Set;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,14 +18,10 @@ class Runner {
         ui.runManager(2, 3);
     }
 
-    public boolean finished() {
-        if (ui == null)
-            return true;
-        return ui.finished();
-    }
 
     public void forceFinish() {
-        ui.printCurrentStatus();
+        if (ui != null)
+            ui.printCurrentStatus();
     }
 
     public void restart() {
@@ -50,7 +45,7 @@ public class Main implements NativeKeyListener {
     }
 
     private static void innitPromptSettings() {
-        int escapeType = 1;
+        int escapeType;
         System.out.println("Exit by (1)Esc (2)Prompt:");
         Scanner sc = new Scanner(System.in);
         escapeType = sc.nextInt();
@@ -70,8 +65,10 @@ public class Main implements NativeKeyListener {
         if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
             try {
                 System.out.println("User pressed Esc");
-                runner.forceFinish();
-                runner.restart();
+                if (runner != null) {
+                    runner.forceFinish();
+                    runner.restart();
+                }
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
@@ -86,8 +83,8 @@ public class Main implements NativeKeyListener {
 
     public static void silentLogger() {
         Handler[] handlers = Logger.getLogger("").getHandlers();
-        for (int i = 0; i < handlers.length; i++) {
-            handlers[i].setLevel(Level.OFF);
+        for (Handler handler : handlers) {
+            handler.setLevel(Level.OFF);
         }
     }
 

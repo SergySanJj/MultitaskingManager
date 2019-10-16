@@ -95,7 +95,7 @@ public class MainServer {
         CharBuffer cbuff = buff.asCharBuffer();
         SocketChannel socketChannel = (SocketChannel) key.channel();
 
-        int numRead = socketChannel.read(buff);
+        socketChannel.read(buff);
         buff.flip();
 
         if (buff.remaining() == 0)
