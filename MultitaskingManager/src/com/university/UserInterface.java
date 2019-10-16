@@ -34,7 +34,6 @@ public class UserInterface {
         runnerThread = new Thread(() -> startManager(fCode, gCode));
         runnerThread.start();
 
-
         if (Settings.usePrompts) {
             inputThread = new Thread(this::startUserPrompt);
             inputThread.start();
@@ -46,7 +45,6 @@ public class UserInterface {
         }
 
         restart();
-        //System.exit(0);
     }
 
     private void startUserPrompt() {
@@ -69,21 +67,23 @@ public class UserInterface {
         }
         if (currentState == Ccancel && !isResultReady) {
             System.out.println("Canceling..");
-            System.out.println(manager.getStatus());
-            manager.close();
-            restart();
-            //System.exit(0);
-        }
-        if (currentState == Ccancel){
-            System.out.println("Canceling..");
-            System.out.println(manager.getStatus());
-            manager.close();
+            printCurrentStatus();
+
             restart();
         }
     }
 
+    public void printCurrentStatus(){
+        System.out.println(manager.getStatus());
+    }
+
     public void close() {
         manager.close();
+        if (inputThread != null && inputThread.isAlive())
+            inputThread.stop();
+        if (runnerThread != null && runnerThread.isAlive())
+            runnerThread.stop();
+        finished = true;
     }
 
     private void inputX() {
@@ -126,16 +126,12 @@ public class UserInterface {
         }
         System.out.println("Result: " + res);
         System.out.println("Total time: " + workedFor + " s");
-        manager.close();
-        //System.exit(0);
+
         restart();
     }
 
     public void restart(){
-        inputThread.stop();
-        runnerThread.stop();
         finished = true;
-        //parent.retry();
-        //System.exit(0);
+        parent.restart();
     }
 }

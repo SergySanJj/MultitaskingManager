@@ -5,6 +5,8 @@ import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 
+import java.util.Scanner;
+import java.util.Set;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,43 +20,61 @@ class Runner {
     }
 
     public boolean finished() {
+        if (ui == null)
+            return true;
         return ui.finished();
+    }
+
+    public void forceFinish() {
+        ui.printCurrentStatus();
+        ui.close();
+    }
+
+    public void restart() {
+        ui.close();
+        run();
     }
 }
 
 public class Main implements NativeKeyListener {
-    private static UserInterface ui;
+    private static Runner runner;
 
     public static void run() {
-        Runner runner = new Runner();
-        while (true) {
-            runner.run();
-            while (!runner.finished()) {
-                try {
-                    Thread.sleep(100);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-
-        }
+        runner = new Runner();
+        runner.run();
     }
 
     public static void main(String[] args) {
         silentLogger();
-        handleEscape();
-
+        innitPromptSettings();
         run();
+    }
+
+    private static void innitPromptSettings() {
+        int escapeType = 1;
+        System.out.println("Exit by (1)Esc (2)Prompt:");
+        Scanner sc = new Scanner(System.in);
+        escapeType = sc.nextInt();
+        if (escapeType == 1) {
+            Settings.usePrompts = false;
+            Settings.useEsc = true;
+        } else {
+            Settings.usePrompts = true;
+            Settings.useEsc = false;
+        }
+        if (Settings.useEsc)
+            handleEscape();
     }
 
 
     public void nativeKeyPressed(NativeKeyEvent e) {
         if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
             try {
-                System.out.println("Finishing..");
-                GlobalScreen.unregisterNativeHook();
-                //ui.close();
-                System.exit(0);
+                System.out.println("User pressed Esc");
+                //GlobalScreen.unregisterNativeHook();
+
+                runner.forceFinish();
+                //System.exit(0);
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
