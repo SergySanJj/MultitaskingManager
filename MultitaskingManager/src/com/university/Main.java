@@ -1,10 +1,5 @@
 package com.university;
 
-import org.jnativehook.GlobalScreen;
-import org.jnativehook.NativeHookException;
-import org.jnativehook.keyboard.NativeKeyEvent;
-import org.jnativehook.keyboard.NativeKeyListener;
-
 import java.util.Scanner;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -30,13 +25,8 @@ class Runner {
     }
 }
 
-public class Main implements NativeKeyListener {
+public class Main {
     private static Runner runner;
-
-    public static void run() {
-        runner = new Runner();
-        runner.run();
-    }
 
     public static void main(String[] args) {
         silentLogger();
@@ -44,41 +34,30 @@ public class Main implements NativeKeyListener {
         run();
     }
 
+    public static Runner getRunner(){
+        return runner;
+    }
+
+    public static void run() {
+        runner = new Runner();
+        runner.run();
+    }
+
     private static void innitPromptSettings() {
         int escapeType;
         System.out.println("Exit by (1)Esc (2)Prompt:");
         Scanner sc = new Scanner(System.in);
         escapeType = sc.nextInt();
-        if (escapeType == 1) {
+
+        if (escapeType == 1)
             Settings.usePrompts = false;
-            Settings.useEsc = true;
-        } else {
+        else
             Settings.usePrompts = true;
-            Settings.useEsc = false;
-        }
+
+        Settings.useEsc = !Settings.usePrompts;
+
         if (Settings.useEsc)
-            handleEscape();
-    }
-
-
-    public void nativeKeyPressed(NativeKeyEvent e) {
-        if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
-            try {
-                System.out.println("User pressed Esc");
-                if (runner != null) {
-                    runner.forceFinish();
-                    runner.restart();
-                }
-            } catch (Exception e1) {
-                e1.printStackTrace();
-            }
-        }
-    }
-
-    public void nativeKeyReleased(NativeKeyEvent e) {
-    }
-
-    public void nativeKeyTyped(NativeKeyEvent e) {
+            EscapeListener.handleEscape();
     }
 
     public static void silentLogger() {
@@ -86,18 +65,5 @@ public class Main implements NativeKeyListener {
         for (Handler handler : handlers) {
             handler.setLevel(Level.OFF);
         }
-    }
-
-    public static void handleEscape() {
-        try {
-            GlobalScreen.registerNativeHook();
-        } catch (NativeHookException ex) {
-            System.err.println("There was a problem registering the native hook.");
-            System.err.println(ex.getMessage());
-
-            System.exit(1);
-        }
-
-        GlobalScreen.addNativeKeyListener(new Main());
     }
 }
