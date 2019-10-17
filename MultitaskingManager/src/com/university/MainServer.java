@@ -23,7 +23,7 @@ public class MainServer {
     private MultitaskManager parentManager;
     private Stack<FunctionArgs> functionArgs;
 
-    MainServer(MultitaskManager parent, int fCode, int gCode, int x) throws Exception {
+    MainServer(MultitaskManager parent, String fCode, String gCode, int x) throws Exception {
         parentManager = parent;
         serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.bind(new InetSocketAddress(0));
@@ -152,15 +152,15 @@ public class MainServer {
 
     class FunctionArgs {
         public int x;
-        public int functionCode;
+        public String functionCode;
 
-        FunctionArgs(int functionCode, int x) {
+        FunctionArgs(String functionCode, int x) {
             this.functionCode = functionCode;
             this.x = x;
         }
 
         public String command() {
-            return Integer.toString(functionCode) + " " + Integer.toString(x);
+            return functionCode + " " + Integer.toString(x);
         }
     }
 

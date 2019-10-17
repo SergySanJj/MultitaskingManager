@@ -17,10 +17,10 @@ public class UserInterface {
     private Thread inputThread;
     private Thread runnerThread;
 
-    private int fCode, gCode;
+    private String fCode, gCode;
 
 
-    public void runManager(int fCode, int gCode) {
+    public void runManager(String fCode, String gCode) {
         this.fCode = fCode;
         this.gCode = gCode;
 
@@ -105,7 +105,7 @@ public class UserInterface {
         } while (!inputed);
     }
 
-    private void startManager(int fCode, int gCode) {
+    private void startManager(String fCode, String gCode) {
 
         try {
             manager.run(x);

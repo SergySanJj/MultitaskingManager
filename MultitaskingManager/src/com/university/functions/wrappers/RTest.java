@@ -1,6 +1,6 @@
 package com.university.functions.wrappers;
 
-public class GTest implements FunctionManager {
+public class RTest implements FunctionManager {
 
     @Override
     public double run(int x) throws Exception {

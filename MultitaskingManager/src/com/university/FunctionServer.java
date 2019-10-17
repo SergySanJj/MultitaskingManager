@@ -20,7 +20,8 @@ public class FunctionServer {
     private Selector selector;
     private SocketChannel channel;
     private String msg;
-    private int functionCode, x;
+    private String functionCode;
+    private int  x;
 
     public FunctionServer(int port) {
         FunctionServer.port = port;
@@ -86,7 +87,7 @@ public class FunctionServer {
         System.out.println("Recieved: " + fargs);
 
         String[] ff = StrFunc.parseNumValues(fargs);
-        functionCode = Integer.parseInt(ff[0]);
+        functionCode = ff[0];
         x = Integer.parseInt(ff[1]);
 
         new Thread(this::processing).start();
@@ -120,7 +121,7 @@ public class FunctionServer {
         }
     }
 
-    private double runFunction(int functionCode, int x) throws Exception {
+    private double runFunction(String functionCode, int x) throws Exception {
         return Functions.run(functionCode, x);
     }
 

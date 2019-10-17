@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class MultitaskManager {
 
-    private int fCode, gCode;
+    private String fCode, gCode;
     private ArrayList<String> results;
     private Process fProcess, gProcess;
     private MainServer mainServer;
@@ -14,14 +14,14 @@ public class MultitaskManager {
 
     private Thread serverThread;
 
-    public MultitaskManager(UserInterface parentUI, int fCode, int gCode) {
+    public MultitaskManager(UserInterface parentUI, String fCode, String gCode) {
         this.fCode = fCode;
         this.gCode = gCode;
         this.parentUI = parentUI;
         results = new ArrayList<>();
     }
 
-    public void setFunctionResult(int functionNumber, String result) {
+    public void setFunctionResult(String functionCode, String result) {
         String[] fRes = StrFunc.parseNumValues(result);
         if (fRes[0].equals("1")) {
             double res = Double.parseDouble(fRes[1]);
