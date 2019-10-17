@@ -18,15 +18,10 @@ public class UserInterface {
     private Thread inputThread;
     private Thread runnerThread;
 
-    private Runner parent;
-
     public boolean finished() {
         return finished;
     }
 
-    UserInterface(Runner parent) {
-        this.parent = parent;
-    }
 
     public void runManager(int fCode, int gCode) {
         inputX();
@@ -137,6 +132,6 @@ public class UserInterface {
 
     public void restart() {
         finished = true;
-        parent.restart();
+        Runner.restart();
     }
 }
