@@ -22,14 +22,16 @@ public class UserInterface {
 
     private String fCode, gCode;
 
-
-    public void runManager(String fCode, String gCode) {
+    public UserInterface(String fCode, String gCode) {
         this.fCode = fCode;
         this.gCode = gCode;
 
+    }
+
+    public void runManager() {
+        manager = new MultitaskManager(this, fCode, gCode);
         inputX();
 
-        manager = new MultitaskManager(this, fCode, gCode);
         runnerThread = new Thread(() -> startManager(fCode, gCode));
         runnerThread.start();
 
@@ -144,7 +146,7 @@ public class UserInterface {
         isResultReady = false;
         currentState = Ccontinue;
         isCurrentlyPrompted = false;
-        runManager(fCode, gCode);
+        runManager();
     }
 
     public static void silentLogger() {

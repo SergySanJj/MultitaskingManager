@@ -13,8 +13,8 @@ class Runner {
         innitPromptSettings();
         innitFunctionCodes();
 
-        ui = new UserInterface();
-        ui.runManager(fCode, gCode);
+        ui = new UserInterface(fCode, gCode);
+        ui.runManager();
     }
 
     public static void forceFinish() {

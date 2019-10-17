@@ -2,11 +2,13 @@ package com.university;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MultitaskManager {
 
     private String fCode, gCode;
-    private ArrayList<String> results;
+    private Map<String, String> results;
     private Process fProcess, gProcess;
     private MainServer mainServer;
     private UserInterface parentUI;
@@ -18,7 +20,7 @@ public class MultitaskManager {
         this.fCode = fCode;
         this.gCode = gCode;
         this.parentUI = parentUI;
-        results = new ArrayList<>();
+        results = new HashMap<>();
     }
 
     public void setFunctionResult(String functionCode, String result) {
@@ -27,12 +29,12 @@ public class MultitaskManager {
             double res = Double.parseDouble(fRes[1]);
             if (Settings.echo)
                 System.out.println(fRes[1]);
-            results.add((Double.toString(res)));
+            results.put(functionCode, (Double.toString(res)));
             if (Math.abs(res) < 1E-12) {
                 parentUI.pollZero();
             }
         } else {
-            results.add("NaN");
+            results.put(functionCode, "NaN");
         }
         if (checkResultReadines()) {
             parentUI.pollResult(operationRes());
@@ -46,11 +48,11 @@ public class MultitaskManager {
     private String operationRes() {
         double res = 1;
         boolean hasNaN = false;
-        for (String el : results) {
-            if (el.equals("NaN"))
+        for (Map.Entry<String,String> el : results.entrySet()) {
+            if (el.getValue().equals("NaN"))
                 hasNaN = true;
             else
-                res *= Double.parseDouble(el);
+                res *= Double.parseDouble(el.getValue());
         }
         if (Math.abs(res) > 1E-13 && hasNaN)
             return "UNDEFINED";
@@ -121,16 +123,18 @@ public class MultitaskManager {
 
     public String getStatus() {
         StringBuilder s = new StringBuilder();
-        for (String el : results)
-            s.append(el).append(" ");
-        return results.size() + " Functions finished executuon with values: " + s.toString();
+        for (Map.Entry<String,String> el : results.entrySet())
+            s.append(el.getKey()).append(" ").append(el.getValue()).append("\n")
+                    .append(el.getKey()).append(" ").append(el.getValue());
+        return "Functions status: \n" + s.toString();
+        //return results.size() + " Functions finished executuon with values: " + s.toString();
     }
 
     public long time() {
         return this.time;
     }
 
-    public void clearResults(){
+    public void clearResults() {
         results.clear();
     }
 }
