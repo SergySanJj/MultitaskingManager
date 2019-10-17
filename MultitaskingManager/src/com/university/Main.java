@@ -32,7 +32,6 @@ public class Main {
     private static Thread hookThread;
 
     public static void main(String[] args) {
-        silentLogger();
         innitPromptSettings();
         run();
     }

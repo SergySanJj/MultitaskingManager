@@ -13,16 +13,11 @@ public class UserInterface {
     private boolean isCurrentlyPrompted = false;
     private boolean isResultReady = false;
     private int currentState = Ccontinue;
-    private boolean finished = false;
 
     private Thread inputThread;
     private Thread runnerThread;
 
     private int fCode, gCode;
-
-    public boolean finished() {
-        return finished;
-    }
 
 
     public void runManager(int fCode, int gCode) {
@@ -31,6 +26,7 @@ public class UserInterface {
 
         inputX();
 
+        manager = new MultitaskManager(this, fCode, gCode);
         runnerThread = new Thread(() -> startManager(fCode, gCode));
         runnerThread.start();
 
@@ -50,11 +46,11 @@ public class UserInterface {
 
     private void startUserPrompt() {
         Scanner sc = new Scanner(System.in);
-        while (currentState != Ccancel && currentState != CwithoutPrompt && !finished) {
+        while (currentState != Ccancel && currentState != CwithoutPrompt) {
             try {
                 Thread.sleep(Settings.maxIdleTime);
             } catch (Exception e) {
-                Thread.currentThread().interrupt();
+                inputThread.interrupt();
                 return;
             }
             System.out.println("Functions running for too long, options: \n" +
@@ -81,13 +77,17 @@ public class UserInterface {
     }
 
     public void close() {
-        if (manager != null)
+        Thread closingThread = new Thread(() -> {
             manager.close();
+        });
+        closingThread.start();
+        while (closingThread.isAlive()) {
+        }
+
         if (inputThread != null && inputThread.isAlive())
             inputThread.interrupt();
         if (runnerThread != null && runnerThread.isAlive())
             runnerThread.interrupt();
-        finished = true;
     }
 
     private void inputX() {
@@ -106,7 +106,7 @@ public class UserInterface {
     }
 
     private void startManager(int fCode, int gCode) {
-        manager = new MultitaskManager(this, fCode, gCode);
+
         try {
             manager.run(x);
         } catch (Exception e) {
@@ -136,8 +136,8 @@ public class UserInterface {
     }
 
     public void restart() {
-        finished = true;
         close();
+        manager.clearResults();
         runManager(fCode, gCode);
     }
 }

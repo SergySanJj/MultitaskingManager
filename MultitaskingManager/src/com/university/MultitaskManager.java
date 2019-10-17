@@ -12,6 +12,8 @@ public class MultitaskManager {
     private UserInterface parentUI;
     private long time;
 
+    private Thread serverThread;
+
     public MultitaskManager(UserInterface parentUI, int fCode, int gCode) {
         this.fCode = fCode;
         this.gCode = gCode;
@@ -61,11 +63,20 @@ public class MultitaskManager {
         time = System.nanoTime();
         startProcesses(mainServer.getPort());
         startServer();
+        while (serverThread.isAlive()) {
+
+        }
     }
 
     private void startServer() throws Exception {
-        mainServer.manageSelector();
-        System.out.println();
+        serverThread = new Thread(() -> {
+            try {
+                mainServer.manageSelector();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        serverThread.start();
     }
 
     private void startProcesses(int port) throws Exception {
@@ -103,6 +114,9 @@ public class MultitaskManager {
 
     public void close() {
         endProcesses();
+        if (serverThread != null)
+            serverThread.interrupt();
+        Thread.currentThread().interrupt();
     }
 
     public String getStatus() {
@@ -114,5 +128,9 @@ public class MultitaskManager {
 
     public long time() {
         return this.time;
+    }
+
+    public void clearResults(){
+        results.clear();
     }
 }

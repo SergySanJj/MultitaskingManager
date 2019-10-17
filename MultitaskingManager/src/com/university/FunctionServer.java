@@ -1,5 +1,7 @@
 package com.university;
 
+import com.university.functions.wrappers.Functions;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;

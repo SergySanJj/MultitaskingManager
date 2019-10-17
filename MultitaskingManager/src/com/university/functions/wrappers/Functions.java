@@ -1,4 +1,4 @@
-package com.university;
+package com.university.functions.wrappers;
 
 import com.university.functions.wrappers.*;
 
