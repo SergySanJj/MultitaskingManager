@@ -1,6 +1,9 @@
 package com.university;
 
 import java.util.Scanner;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UserInterface {
 
@@ -138,6 +141,16 @@ public class UserInterface {
     public void restart() {
         close();
         manager.clearResults();
+        isResultReady = false;
+        currentState = Ccontinue;
+        isCurrentlyPrompted = false;
         runManager(fCode, gCode);
+    }
+
+    public static void silentLogger() {
+        Handler[] handlers = Logger.getLogger("").getHandlers();
+        for (Handler handler : handlers) {
+            handler.setLevel(Level.OFF);
+        }
     }
 }
