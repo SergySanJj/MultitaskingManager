@@ -18,12 +18,17 @@ public class UserInterface {
     private Thread inputThread;
     private Thread runnerThread;
 
+    private int fCode, gCode;
+
     public boolean finished() {
         return finished;
     }
 
 
     public void runManager(int fCode, int gCode) {
+        this.fCode = fCode;
+        this.gCode = gCode;
+
         inputX();
 
         runnerThread = new Thread(() -> startManager(fCode, gCode));
@@ -132,6 +137,7 @@ public class UserInterface {
 
     public void restart() {
         finished = true;
-        Runner.restart();
+        close();
+        runManager(fCode, gCode);
     }
 }

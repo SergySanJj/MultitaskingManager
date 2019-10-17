@@ -18,15 +18,13 @@ class Runner {
         ui.runManager(2, 3);
     }
 
-
     public static void forceFinish() {
         if (ui != null)
             ui.printCurrentStatus();
     }
 
     public static void restart() {
-        ui.close();
-        run();
+        ui.restart();
     }
 }
 
