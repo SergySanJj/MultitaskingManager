@@ -28,7 +28,7 @@ public class HTest implements FunctionManager {
             return 1.0;
         }
         if (x == 7) {
-            Thread.sleep(6000);
+            Thread.sleep(3000);
             return 10.0;
         }
         return 1.0;

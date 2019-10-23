@@ -3,6 +3,7 @@ package com.university;
 import com.university.functions.wrappers.Functions;
 
 import java.util.Scanner;
+import java.util.function.Function;
 
 class Runner {
     public static String fCode = "f", gCode = "g";
@@ -28,6 +29,7 @@ class Runner {
                 }
             }
             uiThread.interrupt();
+            System.out.println();
         }
     }
 
@@ -68,6 +70,8 @@ class Runner {
         Runner.fCode = sc.next();
         Runner.gCode = sc.next();
 
-
+        if (Runner.fCode.equals(Runner.gCode)) {
+            Runner.gCode = Functions.duplicateFunction(fCode);
+        }
     }
 }

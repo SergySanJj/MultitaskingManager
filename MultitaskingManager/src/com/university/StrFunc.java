@@ -19,4 +19,8 @@ public class StrFunc {
         }
         return values;
     }
+
+    public static String parseFunctionWithoutCopyLabel(String str) {
+        return str.replaceAll("copy", "");
+    }
 }

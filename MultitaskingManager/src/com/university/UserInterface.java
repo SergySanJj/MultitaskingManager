@@ -47,7 +47,7 @@ public class UserInterface {
         }
 
         if (manager.checkResultReadines()) {
-            double operationResult = manager.getResult();
+            String operationResult = manager.getResult();
             pollResult(operationResult);
         }
 
@@ -112,7 +112,7 @@ public class UserInterface {
     }
 
 
-    public synchronized void pollResult(double res) {
+    public synchronized void pollResult(String res) {
         double workedFor = (System.nanoTime() - manager.time()) / 1000000000.0;
         isResultReady = true;
         while (isCurrentlyPrompted) {

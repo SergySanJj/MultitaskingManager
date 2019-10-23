@@ -7,7 +7,7 @@ import java.util.*;
 public class MultitaskManager {
 
     private boolean finished = false;
-    private double operationResult;
+    private String operationResult;
 
     private String fCode, gCode;
     private Map<String, String> results;
@@ -69,7 +69,7 @@ public class MultitaskManager {
             } catch (InterruptedException e) {
             }
         }
-        operationResult = Double.parseDouble(tryDoOperation());
+        operationResult = tryDoOperation();
 
         finish();
         //mainServer.finish();
@@ -153,7 +153,7 @@ public class MultitaskManager {
         finished = true;
     }
 
-    public double getResult() {
+    public String getResult() {
         return operationResult;
     }
 }

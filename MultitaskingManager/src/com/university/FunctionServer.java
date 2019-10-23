@@ -12,6 +12,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.Function;
 
 import static java.nio.channels.SelectionKey.*;
 
@@ -21,7 +22,7 @@ public class FunctionServer {
     private SocketChannel channel;
     private String msg;
     private String functionCode;
-    private int  x;
+    private int x;
 
     public FunctionServer(int port) {
         FunctionServer.port = port;
@@ -87,7 +88,8 @@ public class FunctionServer {
         System.out.println("Recieved: " + fargs);
 
         String[] ff = StrFunc.parseNumValues(fargs);
-        functionCode = ff[0];
+        functionCode = StrFunc.parseFunctionWithoutCopyLabel(ff[0]);
+        System.out.println(functionCode);
         x = Integer.parseInt(ff[1]);
 
         new Thread(this::processing).start();
