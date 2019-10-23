@@ -32,10 +32,14 @@ class Runner {
     }
 
     public static void forceFinish() {
-        if (ui != null) {
+        if (isUIworking()) {
             ui.printCurrentStatus();
             ui.finish();
         }
+    }
+
+    public static boolean isUIworking() {
+        return ui != null && ui.isxRetrieved();
     }
 
     private static void innitPromptSettings() {
@@ -63,5 +67,7 @@ class Runner {
         Scanner sc = new Scanner(System.in);
         Runner.fCode = sc.next();
         Runner.gCode = sc.next();
+
+
     }
 }

@@ -120,9 +120,20 @@ public class MultitaskManager {
     }
 
     public String getStatus() {
+        List<String> allFunctions = new ArrayList<>() {
+            {
+                add(fCode);
+                add(gCode);
+            }
+        };
         StringBuilder s = new StringBuilder();
         for (Map.Entry<String, String> el : results.entrySet())
-            s.append(el.getKey()).append(" ").append(el.getValue()).append("\n");
+            s.append(el.getKey()).append(" has finished with result: ").append(el.getValue()).append("\n");
+        for (String fc : allFunctions) {
+            if (!results.containsKey(fc)) {
+                s.append(fc).append(" has not finished\n");
+            }
+        }
         return "Functions status: \n" + s.toString();
         //return results.size() + " Functions finished executuon with values: " + s.toString();
     }

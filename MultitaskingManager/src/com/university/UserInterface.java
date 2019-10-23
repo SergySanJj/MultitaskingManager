@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 public class UserInterface {
     private boolean finished = false;
+    private boolean xRetrieved = false;
 
     private MultitaskManager manager;
     private int x;
@@ -41,8 +42,7 @@ public class UserInterface {
         while (!manager.isFinished()) {
             try {
                 Thread.sleep(20);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (InterruptedException ignored) {
             }
         }
 
@@ -99,6 +99,8 @@ public class UserInterface {
                 System.out.println("x must be an int value");
             }
         } while (!inputed);
+
+        xRetrieved = true;
     }
 
     private void startManager() {
@@ -129,6 +131,10 @@ public class UserInterface {
 
     public synchronized boolean isFinished() {
         return finished;
+    }
+
+    public synchronized boolean isxRetrieved() {
+        return xRetrieved;
     }
 
     public void finish() {
