@@ -1,11 +1,9 @@
 package com.university;
 
 import java.util.Scanner;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class UserInterface {
+    private boolean finished = false;
 
     private MultitaskManager manager;
     private int x;
@@ -29,24 +27,24 @@ public class UserInterface {
     }
 
     public void runManager() {
-        manager = new MultitaskManager(this, fCode, gCode);
+        manager = new MultitaskManager(fCode, gCode);
         inputX();
 
-        runnerThread = new Thread(() -> startManager(fCode, gCode));
+        runnerThread = new Thread(() -> startManager());
         runnerThread.start();
 
         if (Settings.usePrompts) {
             inputThread = new Thread(this::startUserPrompt);
             inputThread.start();
         }
-        try {
-            runnerThread.join();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return;
+
+        while (!manager.isFinished()) {
         }
 
-        restart();
+        double operationResult = manager.getResult();
+        pollResult(operationResult);
+
+        finish();
     }
 
     private void startUserPrompt() {
@@ -72,27 +70,13 @@ public class UserInterface {
             System.out.println("Canceling..");
             printCurrentStatus();
 
-            restart();
+            finish();
         }
     }
 
     public void printCurrentStatus() {
         if (manager != null)
             System.out.println(manager.getStatus());
-    }
-
-    public void close() {
-        Thread closingThread = new Thread(() -> {
-            manager.close();
-        });
-        closingThread.start();
-        while (closingThread.isAlive()) {
-        }
-
-        if (inputThread != null && inputThread.isAlive())
-            inputThread.interrupt();
-        if (runnerThread != null && runnerThread.isAlive())
-            runnerThread.interrupt();
     }
 
     private void inputX() {
@@ -110,8 +94,7 @@ public class UserInterface {
         } while (!inputed);
     }
 
-    private void startManager(String fCode, String gCode) {
-
+    private void startManager() {
         try {
             manager.run(x);
         } catch (Exception e) {
@@ -119,11 +102,8 @@ public class UserInterface {
         }
     }
 
-    public void pollZero() {
-        pollResult("0.0");
-    }
 
-    public void pollResult(String res) {
+    public synchronized void pollResult(double res) {
         double workedFor = (System.nanoTime() - manager.time()) / 1000000000.0;
         isResultReady = true;
         while (isCurrentlyPrompted) {
@@ -137,22 +117,18 @@ public class UserInterface {
         System.out.println("Result: " + res);
         System.out.println("Total time: " + workedFor + " s");
 
-        restart();
+        finish();
     }
 
-    public void restart() {
-        close();
-        manager.clearResults();
-        isResultReady = false;
-        currentState = Ccontinue;
-        isCurrentlyPrompted = false;
-        runManager();
+    public synchronized boolean isFinished() {
+        return finished;
     }
 
-    public static void silentLogger() {
-        Handler[] handlers = Logger.getLogger("").getHandlers();
-        for (Handler handler : handlers) {
-            handler.setLevel(Level.OFF);
-        }
+    public synchronized void finish() {
+        if (runnerThread != null)
+            runnerThread.interrupt();
+        if (inputThread != null)
+            inputThread.interrupt();
+        finished = true;
     }
 }

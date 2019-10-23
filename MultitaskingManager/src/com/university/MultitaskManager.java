@@ -1,58 +1,56 @@
 package com.university;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import javafx.util.Pair;
+
+import java.util.*;
 
 public class MultitaskManager {
+
+    private boolean finished = false;
+    private double operationResult;
 
     private String fCode, gCode;
     private Map<String, String> results;
     private Process fProcess, gProcess;
     private MainServer mainServer;
-    private UserInterface parentUI;
     private long time;
 
     private Thread serverThread;
 
-    public MultitaskManager(UserInterface parentUI, String fCode, String gCode) {
+    public MultitaskManager(String fCode, String gCode) {
         this.fCode = fCode;
         this.gCode = gCode;
-        this.parentUI = parentUI;
         results = new HashMap<>();
     }
 
-    public void setFunctionResult(String functionCode, String result) {
-        String[] fRes = StrFunc.parseNumValues(result);
-        if (fRes[0].equals("1")) {
-            double res = Double.parseDouble(fRes[1]);
-            if (Settings.echo)
-                System.out.println(fRes[1]);
-            results.put(functionCode, (Double.toString(res)));
-            if (Math.abs(res) < 1E-12) {
-                parentUI.pollZero();
-            }
-        } else {
-            results.put(functionCode, "NaN");
-        }
-        if (checkResultReadines()) {
-            parentUI.pollResult(operationRes());
-        }
+    private synchronized void updateResults() {
+        results = mainServer.getResults();
     }
 
-    private boolean checkResultReadines() {
-        return results.size() == 2;
+    private synchronized boolean checkResultReadines() {
+        updateResults();
+        String operationRes = tryDoOperation();
+        if (operationRes.equals("NaN"))
+            return false;
+        if (results.containsKey(fCode) && results.containsKey(gCode)
+                || operationRes.equals("0.0"))
+            return true;
+        return false;
     }
 
-    private String operationRes() {
+    private synchronized String tryDoOperation() {
         double res = 1;
+        String operationResult = "NaN";
         boolean hasNaN = false;
-        for (Map.Entry<String,String> el : results.entrySet()) {
+        for (Map.Entry<String, String> el : results.entrySet()) {
             if (el.getValue().equals("NaN"))
                 hasNaN = true;
-            else
-                res *= Double.parseDouble(el.getValue());
+            else {
+                double val = Double.parseDouble(el.getValue());
+                if (val < 1e-7)
+                    return "0.0";
+                res *= val;
+            }
         }
         if (Math.abs(res) > 1E-13 && hasNaN)
             return "UNDEFINED";
@@ -60,17 +58,20 @@ public class MultitaskManager {
     }
 
     public void run(int x) throws Exception {
-        mainServer = new MainServer(this, fCode, gCode, x);
+        mainServer = new MainServer(fCode, gCode, x);
 
         time = System.nanoTime();
         startProcesses(mainServer.getPort());
         startServer();
-        while (serverThread.isAlive()) {
-
+        while (!checkResultReadines()) {
         }
+        operationResult = Double.parseDouble(tryDoOperation());
+
+        finish();
+        //mainServer.finish();
     }
 
-    private void startServer() throws Exception {
+    private void startServer() {
         serverThread = new Thread(() -> {
             try {
                 mainServer.manageSelector();
@@ -114,16 +115,9 @@ public class MultitaskManager {
         }
     }
 
-    public void close() {
-        endProcesses();
-        if (serverThread != null)
-            serverThread.interrupt();
-        Thread.currentThread().interrupt();
-    }
-
     public String getStatus() {
         StringBuilder s = new StringBuilder();
-        for (Map.Entry<String,String> el : results.entrySet())
+        for (Map.Entry<String, String> el : results.entrySet())
             s.append(el.getKey()).append(" ").append(el.getValue()).append("\n")
                     .append(el.getKey()).append(" ").append(el.getValue());
         return "Functions status: \n" + s.toString();
@@ -134,7 +128,18 @@ public class MultitaskManager {
         return this.time;
     }
 
-    public void clearResults() {
-        results.clear();
+    public synchronized boolean isFinished() {
+        return finished;
+    }
+
+    public synchronized void finish() {
+        endProcesses();
+        serverThread.interrupt();
+
+        finished = true;
+    }
+
+    public double getResult() {
+        return operationResult;
     }
 }

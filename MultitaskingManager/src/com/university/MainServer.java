@@ -8,10 +8,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 import static java.nio.channels.SelectionKey.OP_READ;
 import static java.nio.channels.SelectionKey.OP_WRITE;
@@ -20,15 +17,18 @@ public class MainServer {
     private ServerSocketChannel serverSocketChannel;
     private ArrayList<FunctionChannel> functionChannels;
     private Selector selector;
-    private MultitaskManager parentManager;
+
     private Stack<FunctionArgs> functionArgs;
 
-    MainServer(MultitaskManager parent, String fCode, String gCode, int x) throws Exception {
-        parentManager = parent;
-        serverSocketChannel = ServerSocketChannel.open();
-        serverSocketChannel.bind(new InetSocketAddress(0));
+    private Map<String, String> results;
+
+    MainServer( String fCode, String gCode, int x) throws Exception {
+        results = new HashMap<>();
         functionChannels = new ArrayList<>();
         functionArgs = new Stack<>();
+
+        serverSocketChannel = ServerSocketChannel.open();
+        serverSocketChannel.bind(new InetSocketAddress(0));
         functionArgs.push(new FunctionArgs(fCode, x));
         functionArgs.push(new FunctionArgs(gCode, x));
     }
@@ -37,24 +37,13 @@ public class MainServer {
         return serverSocketChannel.socket().getLocalPort();
     }
 
-    public void endServerWork() {
+    private void endServerWork() {
         try {
             serverSocketChannel.close();
             for (FunctionChannel channel : functionChannels)
                 channel.channel.close();
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    boolean isRunning() {
-        try {
-            for (FunctionChannel channel : functionChannels)
-                if (channel.channel.isOpen())
-                    return true;
-            return false;
-        } catch (Exception e) {
-            return false;
         }
     }
 
@@ -105,9 +94,28 @@ public class MainServer {
             if (functionChannel.channel.equals(socketChannel)) {
                 if (Settings.echo)
                     System.out.println("Recieved " + res);
-                parentManager.setFunctionResult(functionChannel.fargs.functionCode, res);
+                addResult(functionChannel.fargs.functionCode, res);
             }
         }
+    }
+
+    private synchronized void addResult(String functionCode, String result) {
+        String[] fRes = StrFunc.parseNumValues(result);
+        if (fRes[0].equals("1")) {
+            double res = Double.parseDouble(fRes[1]);
+            if (Settings.echo)
+                System.out.println(fRes[1]);
+            if (Math.abs(res) < 1E-12) {
+                res = 0.0;
+            }
+            results.put(functionCode, (Double.toString(res)));
+        } else {
+            results.put(functionCode, "NaN");
+        }
+    }
+
+    public synchronized Map<String, String> getResults() {
+        return results;
     }
 
     private void write(SelectionKey key) throws IOException {
@@ -173,9 +181,9 @@ public class MainServer {
             this.channel = channel;
             this.fargs = fargs;
         }
+    }
 
-        public SocketChannel socketChannel() {
-            return channel;
-        }
+    public void finish(){
+        endServerWork();
     }
 }

@@ -8,22 +8,29 @@ class Runner {
     public static String fCode = "f", gCode = "g";
     private static UserInterface ui;
     private static Thread hookThread;
+    private static Thread uiThread;
 
     public static void run() {
         innitPromptSettings();
         innitFunctionCodes();
 
-        ui = new UserInterface(fCode, gCode);
-        ui.runManager();
+        while (true) {
+            ui = new UserInterface(fCode, gCode);
+            uiThread = new Thread(() -> {
+                ui.runManager();
+            });
+            uiThread.start();
+            while (!ui.isFinished()) {
+
+            }
+            uiThread.interrupt();
+            System.out.println("fff");
+        }
     }
 
     public static void forceFinish() {
         if (ui != null)
             ui.printCurrentStatus();
-    }
-
-    public static void restart() {
-        ui.restart();
     }
 
     private static void innitPromptSettings() {

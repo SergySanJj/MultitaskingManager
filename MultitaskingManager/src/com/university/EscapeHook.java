@@ -18,11 +18,7 @@ public class EscapeHook {
             public void keyPressed(GlobalKeyEvent event) {
                 if (event.getVirtualKeyCode() == GlobalKeyEvent.VK_ESCAPE) {
                     System.out.println("User pressed Esc");
-                    new Thread(() -> {
-                        Runner.forceFinish();
-                        Runner.restart();
-                    }).start();
-
+                    Runner.forceFinish();
                 }
             }
 
