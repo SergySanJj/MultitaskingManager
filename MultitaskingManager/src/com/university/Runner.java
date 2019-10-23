@@ -21,16 +21,21 @@ class Runner {
             });
             uiThread.start();
             while (!ui.isFinished()) {
-
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             uiThread.interrupt();
-            System.out.println("fff");
         }
     }
 
     public static void forceFinish() {
-        if (ui != null)
+        if (ui != null) {
             ui.printCurrentStatus();
+            ui.finish();
+        }
     }
 
     private static void innitPromptSettings() {

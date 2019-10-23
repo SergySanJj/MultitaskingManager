@@ -27,20 +27,20 @@ public class MultitaskManager {
         results = mainServer.getResults();
     }
 
-    private synchronized boolean checkResultReadines() {
+    public synchronized boolean checkResultReadines() {
         updateResults();
         String operationRes = tryDoOperation();
         if (operationRes.equals("NaN"))
             return false;
-        if (results.containsKey(fCode) && results.containsKey(gCode)
+        if ((results.containsKey(fCode) && results.containsKey(gCode))
                 || operationRes.equals("0.0"))
             return true;
+
         return false;
     }
 
     private synchronized String tryDoOperation() {
         double res = 1;
-        String operationResult = "NaN";
         boolean hasNaN = false;
         for (Map.Entry<String, String> el : results.entrySet()) {
             if (el.getValue().equals("NaN"))
@@ -64,6 +64,10 @@ public class MultitaskManager {
         startProcesses(mainServer.getPort());
         startServer();
         while (!checkResultReadines()) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+            }
         }
         operationResult = Double.parseDouble(tryDoOperation());
 
@@ -118,8 +122,7 @@ public class MultitaskManager {
     public String getStatus() {
         StringBuilder s = new StringBuilder();
         for (Map.Entry<String, String> el : results.entrySet())
-            s.append(el.getKey()).append(" ").append(el.getValue()).append("\n")
-                    .append(el.getKey()).append(" ").append(el.getValue());
+            s.append(el.getKey()).append(" ").append(el.getValue()).append("\n");
         return "Functions status: \n" + s.toString();
         //return results.size() + " Functions finished executuon with values: " + s.toString();
     }
@@ -132,7 +135,7 @@ public class MultitaskManager {
         return finished;
     }
 
-    public synchronized void finish() {
+    public void finish() {
         endProcesses();
         serverThread.interrupt();
 

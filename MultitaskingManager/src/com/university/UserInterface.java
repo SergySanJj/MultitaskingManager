@@ -39,12 +39,20 @@ public class UserInterface {
         }
 
         while (!manager.isFinished()) {
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
-        double operationResult = manager.getResult();
-        pollResult(operationResult);
+        if (manager.checkResultReadines()) {
+            double operationResult = manager.getResult();
+            pollResult(operationResult);
+        }
 
-        finish();
+        if (!isFinished())
+            finish();
     }
 
     private void startUserPrompt() {
@@ -69,7 +77,6 @@ public class UserInterface {
         if (currentState == Ccancel && !isResultReady) {
             System.out.println("Canceling..");
             printCurrentStatus();
-
             finish();
         }
     }
@@ -108,7 +115,7 @@ public class UserInterface {
         isResultReady = true;
         while (isCurrentlyPrompted) {
             try {
-                Thread.sleep(1);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return;
@@ -124,7 +131,8 @@ public class UserInterface {
         return finished;
     }
 
-    public synchronized void finish() {
+    public void finish() {
+        manager.finish();
         if (runnerThread != null)
             runnerThread.interrupt();
         if (inputThread != null)

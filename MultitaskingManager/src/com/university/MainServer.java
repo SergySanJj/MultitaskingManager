@@ -22,7 +22,7 @@ public class MainServer {
 
     private Map<String, String> results;
 
-    MainServer( String fCode, String gCode, int x) throws Exception {
+    MainServer(String fCode, String gCode, int x) throws Exception {
         results = new HashMap<>();
         functionChannels = new ArrayList<>();
         functionArgs = new Stack<>();
@@ -39,6 +39,7 @@ public class MainServer {
 
     private void endServerWork() {
         try {
+            selector.close();
             serverSocketChannel.close();
             for (FunctionChannel channel : functionChannels)
                 channel.channel.close();
@@ -75,6 +76,11 @@ public class MainServer {
                         e.printStackTrace();
                     }
                 }
+            }
+
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException ignored) {
             }
         }
     }
@@ -181,9 +187,5 @@ public class MainServer {
             this.channel = channel;
             this.fargs = fargs;
         }
-    }
-
-    public void finish(){
-        endServerWork();
     }
 }
