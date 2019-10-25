@@ -1,4 +1,7 @@
-package com.university;
+package com.university.manager;
+
+import com.university.Settings;
+import com.university.StrFunc;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

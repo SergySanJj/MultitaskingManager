@@ -1,4 +1,4 @@
-package com.university;
+package com.university.manager;
 
 import lc.kra.system.keyboard.GlobalKeyboardHook;
 import lc.kra.system.keyboard.event.GlobalKeyAdapter;

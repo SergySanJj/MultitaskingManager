@@ -1,4 +1,4 @@
-package com.university;
+package com.university.functionclient;
 
 public class FunctionProcess {
     private static int port;

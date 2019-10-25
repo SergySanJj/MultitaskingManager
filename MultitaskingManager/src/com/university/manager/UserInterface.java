@@ -1,4 +1,6 @@
-package com.university;
+package com.university.manager;
+
+import com.university.Settings;
 
 import java.util.Scanner;
 

@@ -1,5 +1,6 @@
-package com.university;
+package com.university.functionclient;
 
+import com.university.StrFunc;
 import com.university.functions.wrappers.Functions;
 
 import java.io.IOException;
@@ -12,7 +13,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.function.Function;
 
 import static java.nio.channels.SelectionKey.*;
 

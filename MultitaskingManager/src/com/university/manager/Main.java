@@ -1,4 +1,4 @@
-package com.university;
+package com.university.manager;
 
 public class Main {
     public static void main(String[] args) {

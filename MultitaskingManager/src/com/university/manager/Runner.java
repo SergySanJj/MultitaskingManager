@@ -1,9 +1,9 @@
-package com.university;
+package com.university.manager;
 
+import com.university.Settings;
 import com.university.functions.wrappers.Functions;
 
 import java.util.Scanner;
-import java.util.function.Function;
 
 class Runner {
     public static String fCode = "f", gCode = "g";

@@ -1,6 +1,7 @@
-package com.university;
+package com.university.manager;
 
-import javafx.util.Pair;
+import com.university.Settings;
+import com.university.functionclient.FunctionProcess;
 
 import java.util.*;
 
