@@ -1,11 +1,10 @@
 package com.university.functionclient;
 
 public class FunctionProcess {
-    private static int port;
     private static FunctionServer functionServer;
 
     public static void main(String[] args) {
-        port = Integer.parseInt(args[0]);
+        int port = Integer.parseInt(args[0]);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> System.exit(0)));
 

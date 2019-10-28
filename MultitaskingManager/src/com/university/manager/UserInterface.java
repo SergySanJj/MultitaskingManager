@@ -5,8 +5,8 @@ import com.university.Settings;
 import java.util.Scanner;
 
 public class UserInterface {
-    private boolean finished = false;
-    private boolean xRetrieved = false;
+    private volatile boolean finished = false;
+    private volatile boolean xRetrieved = false;
 
     private MultitaskManager manager;
     private int x;
@@ -33,7 +33,7 @@ public class UserInterface {
         manager = new MultitaskManager(fCode, gCode);
         inputX();
 
-        runnerThread = new Thread(() -> startManager());
+        runnerThread = new Thread(this::startManager);
         runnerThread.start();
 
         if (Settings.usePrompts) {
@@ -48,7 +48,7 @@ public class UserInterface {
             }
         }
 
-        if (manager.checkResultReadines()) {
+        if (manager.checkResultReadiness()) {
             String operationResult = manager.getResult();
             pollResult(operationResult);
         }
@@ -89,18 +89,18 @@ public class UserInterface {
     }
 
     private void inputX() {
-        boolean inputed = false;
+        boolean inputted = false;
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter x:");
         do {
             try {
                 String str = sc.next();
                 x = Integer.parseInt(str);
-                inputed = true;
+                inputted = true;
             } catch (Exception e) {
                 System.out.println("x must be an int value");
             }
-        } while (!inputed);
+        } while (!inputted);
 
         xRetrieved = true;
     }

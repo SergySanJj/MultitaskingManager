@@ -5,10 +5,9 @@ import lc.kra.system.keyboard.event.GlobalKeyAdapter;
 import lc.kra.system.keyboard.event.GlobalKeyEvent;
 
 public class EscapeHook {
-    public static GlobalKeyboardHook keyboardHook;
+    private static GlobalKeyboardHook keyboardHook;
 
     public static void runHook() {
-        boolean run = true;
         if (keyboardHook == null)
             keyboardHook = new GlobalKeyboardHook(true);
 

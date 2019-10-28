@@ -1,10 +1,6 @@
 package com.university.functions.wrappers;
 
-import javafx.util.Pair;
-
-import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class Functions {
@@ -23,7 +19,7 @@ public class Functions {
 
     private static Map<String, FunctionManager> functions;
 
-    public static void addFunction(String functionCode, FunctionManager f) {
+    private static void addFunction(String functionCode, FunctionManager f) {
         try {
             functions.put(functionCode, f);
         } catch (Exception e) {
@@ -35,7 +31,7 @@ public class Functions {
         return getFunctionManager(functionCode).run(x);
     }
 
-    public static FunctionManager getFunctionManager(String functionCode) {
+    private static FunctionManager getFunctionManager(String functionCode) {
         return functions.get(functionCode);
     }
 

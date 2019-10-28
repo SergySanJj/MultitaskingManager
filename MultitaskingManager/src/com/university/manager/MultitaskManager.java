@@ -6,8 +6,7 @@ import com.university.functionclient.FunctionProcess;
 import java.util.*;
 
 public class MultitaskManager {
-
-    private boolean finished = false;
+    private volatile boolean finished = false;
     private String operationResult;
 
     private String fCode, gCode;
@@ -28,16 +27,13 @@ public class MultitaskManager {
         results = mainServer.getResults();
     }
 
-    public synchronized boolean checkResultReadines() {
+    public synchronized boolean checkResultReadiness() {
         updateResults();
         String operationRes = tryDoOperation();
         if (operationRes.equals("NaN"))
             return false;
-        if ((results.containsKey(fCode) && results.containsKey(gCode))
-                || operationRes.equals("0.0"))
-            return true;
-
-        return false;
+        return (results.containsKey(fCode) && results.containsKey(gCode))
+                || operationRes.equals("0.0");
     }
 
     private synchronized String tryDoOperation() {
@@ -64,10 +60,10 @@ public class MultitaskManager {
         time = System.nanoTime();
         startProcesses(mainServer.getPort());
         startServer();
-        while (!checkResultReadines()) {
+        while (!checkResultReadiness()) {
             try {
                 Thread.sleep(10);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
         }
         operationResult = tryDoOperation();
@@ -136,7 +132,6 @@ public class MultitaskManager {
             }
         }
         return "Functions status: \n" + s.toString();
-        //return results.size() + " Functions finished executuon with values: " + s.toString();
     }
 
     public long time() {

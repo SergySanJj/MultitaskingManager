@@ -177,7 +177,7 @@ public class MainServer {
         }
 
         public String command() {
-            return functionCode + " " + Integer.toString(x);
+            return functionCode + " " + x;
         }
     }
 

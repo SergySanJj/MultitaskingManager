@@ -6,10 +6,9 @@ import com.university.functions.wrappers.Functions;
 import java.util.Scanner;
 
 class Runner {
-    public static String fCode = "f", gCode = "g";
+    private static String fCode = "f";
+    private static String gCode = "g";
     private static UserInterface ui;
-    private static Thread hookThread;
-    private static Thread uiThread;
 
     public static void run() {
         innitPromptSettings();
@@ -17,9 +16,7 @@ class Runner {
 
         while (true) {
             ui = new UserInterface(fCode, gCode);
-            uiThread = new Thread(() -> {
-                ui.runManager();
-            });
+            Thread uiThread = new Thread(() -> ui.runManager());
             uiThread.start();
             while (!ui.isFinished()) {
                 try {
@@ -50,15 +47,12 @@ class Runner {
         Scanner sc = new Scanner(System.in);
         escapeType = sc.nextInt();
 
-        if (escapeType == 1)
-            Settings.usePrompts = false;
-        else
-            Settings.usePrompts = true;
+        Settings.usePrompts = escapeType != 1;
 
         Settings.useEsc = !Settings.usePrompts;
 
         if (Settings.useEsc) {
-            hookThread = new Thread(EscapeHook::runHook);
+            Thread hookThread = new Thread(EscapeHook::runHook);
             hookThread.start();
         }
     }
