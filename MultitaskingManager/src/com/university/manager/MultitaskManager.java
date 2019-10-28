@@ -124,14 +124,17 @@ public class MultitaskManager {
             }
         };
         StringBuilder s = new StringBuilder();
-        for (Map.Entry<String, String> el : results.entrySet())
-            s.append(el.getKey()).append(" has finished with result: ").append(el.getValue()).append("\n");
+        s.append("Result can't be computed due to: \n");
         for (String fc : allFunctions) {
             if (!results.containsKey(fc)) {
-                s.append(fc).append(" has not finished\n");
+                s.append("   ").append(fc).append(" has not finished\n");
             }
         }
-        return "Functions status: \n" + s.toString();
+        if (results.size() > 0)
+            s.append("However next functions managed to finish: \n");
+        for (Map.Entry<String, String> el : results.entrySet())
+            s.append("   ").append(el.getKey()).append(" has finished with result: ").append(el.getValue()).append("\n");
+        return s.toString();
     }
 
     public long time() {

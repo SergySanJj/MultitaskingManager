@@ -77,7 +77,7 @@ public class UserInterface {
             currentState = code;
         }
         if (currentState == Ccancel && !isResultReady) {
-            System.out.println("Canceling..");
+            System.out.println("User chose to cancel");
             printCurrentStatus();
             finish();
         }
