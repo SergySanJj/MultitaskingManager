@@ -16,10 +16,10 @@ public class EscapeHook {
             @Override
             public void keyPressed(GlobalKeyEvent event) {
                 if (event.getVirtualKeyCode() == GlobalKeyEvent.VK_ESCAPE) {
-                    if (Runner.isUIworking()) {
-                        System.out.println("User pressed Esc");
-                        Runner.forceFinish();
-                    }
+
+                    System.out.println("User pressed Esc");
+                    Runner.forceFinish();
+
                 }
             }
 

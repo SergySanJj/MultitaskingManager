@@ -8,37 +8,30 @@ import java.util.Scanner;
 class Runner {
     private static String fCode = "f";
     private static String gCode = "g";
-    private static UserInterface ui;
+    private static Manager manager;
 
     public static void run() {
         innitPromptSettings();
         innitFunctionCodes();
 
         while (true) {
-            ui = new UserInterface(fCode, gCode);
-            Thread uiThread = new Thread(() -> ui.runManager());
-            uiThread.start();
-            while (!ui.isFinished()) {
+            manager = new Manager(fCode, gCode);
+            Thread managerThread = new Thread(() -> manager.run());
+            managerThread.start();
+            while (!manager.isFinished()) {
                 try {
                     Thread.sleep(20);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            uiThread.interrupt();
+            managerThread.interrupt();
             System.out.println();
         }
     }
 
     public static void forceFinish() {
-        if (isUIworking()) {
-            ui.printCurrentStatus();
-            ui.finish();
-        }
-    }
 
-    public static boolean isUIworking() {
-        return ui != null && ui.isxRetrieved();
     }
 
     private static void innitPromptSettings() {
