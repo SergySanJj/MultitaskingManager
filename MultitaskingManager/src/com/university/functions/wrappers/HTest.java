@@ -31,6 +31,12 @@ public class HTest implements FunctionManager {
             Thread.sleep(3000);
             return 10.0;
         }
+        if (x == 8) {
+            return 1 / 0.0;
+        }
+        if (x == 9) {
+            throw new Exception();
+        }
         return 1.0;
     }
 

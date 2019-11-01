@@ -8,17 +8,11 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Set;
 
-import static java.nio.channels.SelectionKey.*;
 
 public class FunctionServer {
     private static int port;
-    private Selector selector;
     private SocketChannel channel;
     private String msg;
     private String functionCode;
@@ -29,36 +23,18 @@ public class FunctionServer {
     }
 
     public void start() throws Exception {
+        connect();
+        read();
+        processing();
+        write();
+    }
+
+    private void connect() throws Exception {
         channel = SocketChannel.open();
-        channel.configureBlocking(false);
+        channel.configureBlocking(true);
         channel.connect(new InetSocketAddress("localhost", port));
-
-        selector = Selector.open();
-        channel.register(selector, OP_CONNECT);
-
-        while (selector.isOpen()) {
-            selector.select();
-
-            Set<SelectionKey> readyKeys = selector.selectedKeys();
-            Iterator<SelectionKey> iterator = readyKeys.iterator();
-            while (iterator.hasNext()) {
-                SelectionKey selectionKey = iterator.next();
-                iterator.remove();
-
-                if (!selectionKey.isValid())
-                    break;
-
-                else if (selectionKey.isConnectable() && !channel.isConnected()) {
-                    connect(selectionKey);
-                } else if (selectionKey.isReadable()) {
-                    read(selectionKey);
-                } else if (selectionKey.isWritable()) {
-                    write();
-
-                }
-            }
-        }
-
+        while (!channel.isConnected()) ;
+        System.out.println("Connection established");
     }
 
     private void write() throws IOException {
@@ -76,7 +52,7 @@ public class FunctionServer {
     }
 
 
-    private void read(SelectionKey selectionKey) throws IOException {
+    private void read() throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(256);
         CharBuffer cbuff = buffer.asCharBuffer();
 
@@ -91,28 +67,14 @@ public class FunctionServer {
         functionCode = StrFunc.parseFunctionWithoutCopyLabel(ff[0]);
         System.out.println(functionCode);
         x = Integer.parseInt(ff[1]);
-
-        new Thread(this::processing).start();
-        selectionKey.interestOps(OP_WRITE);
     }
 
-    private void processing() {
+    private void processing(){
         System.out.println("Running..");
         startProcessing();
-        try {
-            channel.register(selector, OP_WRITE);
-        } catch (ClosedChannelException e) {
-            e.printStackTrace();
-        }
         System.out.println("Got result " + msg);
     }
 
-
-    private void connect(SelectionKey selectionKey) throws IOException {
-        channel.finishConnect();
-        selectionKey.interestOps(OP_READ);
-        System.out.println("Connection established");
-    }
 
     private void startProcessing() {
         try {
