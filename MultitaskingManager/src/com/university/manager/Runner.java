@@ -6,8 +6,8 @@ import com.university.functions.wrappers.Functions;
 import java.util.Scanner;
 
 class Runner {
-    private static String fCode = "f";
-    private static String gCode = "g";
+    private static String fCode = null;
+    private static String gCode = null;
     private static Manager manager;
 
     public static void run() {
@@ -48,7 +48,6 @@ class Runner {
         escapeType = sc.nextInt();
 
         Settings.usePrompts = escapeType != 1;
-
         Settings.useEsc = !Settings.usePrompts;
 
         if (Settings.useEsc) {
@@ -58,11 +57,13 @@ class Runner {
     }
 
     private static void innitFunctionCodes() {
-        System.out.println("Choose 2 functions from available: ");
-        Functions.printAvailableFunctions();
         Scanner sc = new Scanner(System.in);
-        Runner.fCode = sc.next();
-        Runner.gCode = sc.next();
+        while (fCode == null || gCode == null || !(Functions.hasFunction(fCode) && Functions.hasFunction(gCode))) {
+            System.out.println("Choose 2 functions from available: ");
+            Functions.printAvailableFunctions();
+            Runner.fCode = sc.next();
+            Runner.gCode = sc.next();
+        }
 
         if (Runner.fCode.equals(Runner.gCode)) {
             Runner.gCode = Functions.duplicateFunction(fCode);

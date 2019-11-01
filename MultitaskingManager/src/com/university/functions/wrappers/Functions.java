@@ -4,9 +4,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class Functions {
+    private static Map<String, FunctionManager> functions;
 
     private Functions() {
-
     }
 
     static {
@@ -16,8 +16,6 @@ public class Functions {
         addFunction("h", new HTest());
         addFunction("r", new RTest());
     }
-
-    private static Map<String, FunctionManager> functions;
 
     private static void addFunction(String functionCode, FunctionManager f) {
         try {
@@ -47,5 +45,9 @@ public class Functions {
             System.out.print(f.getKey() + " ");
         }
         System.out.println();
+    }
+
+    public static boolean hasFunction(String functionCode) {
+        return functions.get(functionCode) != null;
     }
 }

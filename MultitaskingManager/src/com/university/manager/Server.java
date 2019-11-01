@@ -37,6 +37,9 @@ public class Server {
 
     private Map<String, String> results;
 
+    private Server() {
+    }
+
     public Server(int x, String fCode, String gCode) {
         this.fCode = fCode;
         this.gCode = gCode;
@@ -57,15 +60,15 @@ public class Server {
         }
     }
 
-    public int getPort() {
-        return serverSocketChannel.socket().getLocalPort();
-    }
-
     public void start() throws Exception {
         connectChannels();
         passArguments();
         // Listen respond with selector
         listenResults();
+    }
+
+    public int getPort() {
+        return serverSocketChannel.socket().getLocalPort();
     }
 
     private void connectChannels() throws Exception {
@@ -110,39 +113,51 @@ public class Server {
             startMillis = System.currentTimeMillis();
             long lastTime = System.currentTimeMillis();
             while (selector.isOpen() && !finished) {
-                if (Settings.usePrompts && currentState == Ccontinue) {
-                    if (System.currentTimeMillis() - lastTime >= Settings.maxIdleTime) {
-                        startUserPrompt();
-                        lastTime = System.currentTimeMillis();
-                    }
-                }
-                selector.select(Settings.maxIdleTime);
-                Set<SelectionKey> readyKeys = selector.selectedKeys();
-                Iterator<SelectionKey> iterator = readyKeys.iterator();
-                while (iterator.hasNext()) {
-                    SelectionKey key = iterator.next();
-                    iterator.remove();
-                    try {
-                        if (key != null && key.isReadable())
-                            read(key);
-                    } catch (IOException e) {
-                        key.cancel();
-                        try {
-                            key.channel().close();
-                        } catch (IOException e1) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-                if (currentState == Ccancel && !finished) {
-                    System.out.println("User chose to cancel");
-                    System.out.println(getStatus());
-                    finished = true;
-                }
+                lastTime = doPromptIfReady(lastTime);
+                doReadSelect();
+                promptCancellationCheck();
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private long doPromptIfReady(long lastTime) {
+        if (Settings.usePrompts && currentState == Ccontinue) {
+            if (System.currentTimeMillis() - lastTime >= Settings.maxIdleTime) {
+                startUserPrompt();
+                lastTime = System.currentTimeMillis();
+            }
+        }
+        return lastTime;
+    }
+
+    private void doReadSelect() throws IOException {
+        selector.select(Settings.maxIdleTime);
+        Set<SelectionKey> readyKeys = selector.selectedKeys();
+        Iterator<SelectionKey> iterator = readyKeys.iterator();
+        while (iterator.hasNext()) {
+            SelectionKey key = iterator.next();
+            iterator.remove();
+            try {
+                if (key != null && key.isReadable())
+                    read(key);
+            } catch (IOException e) {
+                key.cancel();
+                try {
+                    key.channel().close();
+                } catch (IOException e1) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void promptCancellationCheck() {
+        if (currentState == Ccancel && !finished) {
+            System.out.println("User chose to cancel");
+            System.out.println(getStatus());
+            finished = true;
         }
     }
 
@@ -161,7 +176,7 @@ public class Server {
         for (FunctionChannel functionChannel : functionChannels) {
             if (functionChannel.channel.equals(socketChannel)) {
                 if (Settings.echo)
-                    System.out.println("Recieved " + res);
+                    System.out.println("Received " + res);
                 addResult(functionChannel.fargs.functionCode, res);
                 pollResult();
             }
@@ -188,6 +203,7 @@ public class Server {
             double workedFor = (System.currentTimeMillis() - startMillis) / 1000.0;
             System.out.println("Result: " + tryDoOperation());
             System.out.println("Total time: " + workedFor + " s");
+
             finished = true;
         }
     }
@@ -219,24 +235,24 @@ public class Server {
     }
 
 
-    class FunctionArgs {
-        public int x;
-        public String functionCode;
+    static class FunctionArgs {
+        int x;
+        String functionCode;
 
         FunctionArgs(String functionCode, int x) {
             this.functionCode = functionCode;
             this.x = x;
         }
 
-        public String command() {
+        String command() {
             return functionCode + " " + x;
         }
     }
 
-    class FunctionChannel {
-        private SocketChannel channel;
-        public FunctionArgs fargs;
-        public boolean passedArgs = false;
+    static class FunctionChannel {
+        SocketChannel channel;
+        FunctionArgs fargs;
+        boolean passedArgs = false;
 
         FunctionChannel(SocketChannel channel, FunctionArgs fargs) {
             this.channel = channel;
