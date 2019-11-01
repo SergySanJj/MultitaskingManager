@@ -16,6 +16,12 @@ import java.util.*;
 import static java.nio.channels.SelectionKey.OP_READ;
 
 public class Server {
+    private static final int Ccontinue = 1;
+    private static final int CwithoutPrompt = 2;
+    private static final int Ccancel = 3;
+    private int currentState = Ccontinue;
+    Scanner sc;
+
     private int x;
     private String fCode;
     private String gCode;
@@ -23,7 +29,8 @@ public class Server {
     private Stack<FunctionArgs> functionArgs;
     private ArrayList<FunctionChannel> functionChannels;
     private ServerSocketChannel serverSocketChannel;
-    Selector selector;
+    private Selector selector;
+    private long startMillis;
 
     private boolean finished = false;
     private final Object finishMutex = new Object();
@@ -40,6 +47,7 @@ public class Server {
         functionArgs = new Stack<>();
         functionArgs.push(new FunctionArgs(fCode, x));
         functionArgs.push(new FunctionArgs(gCode, x));
+        sc = new Scanner(System.in);
 
         try {
             serverSocketChannel = ServerSocketChannel.open();
@@ -99,17 +107,21 @@ public class Server {
                 functionChannel.channel.configureBlocking(false);
                 functionChannel.channel.register(selector, OP_READ);
             }
-
+            startMillis = System.currentTimeMillis();
+            long lastTime = System.currentTimeMillis();
             while (selector.isOpen() && !finished) {
-
+                if (Settings.usePrompts && currentState == Ccontinue) {
+                    if (System.currentTimeMillis() - lastTime >= Settings.maxIdleTime) {
+                        startUserPrompt();
+                        lastTime = System.currentTimeMillis();
+                    }
+                }
                 selector.select(Settings.maxIdleTime);
                 Set<SelectionKey> readyKeys = selector.selectedKeys();
                 Iterator<SelectionKey> iterator = readyKeys.iterator();
                 while (iterator.hasNext()) {
-
                     SelectionKey key = iterator.next();
                     iterator.remove();
-
                     try {
                         if (key != null && key.isReadable())
                             read(key);
@@ -121,6 +133,12 @@ public class Server {
                             e.printStackTrace();
                         }
                     }
+                }
+
+                if (currentState == Ccancel && !finished) {
+                    System.out.println("User chose to cancel");
+                    System.out.println(getStatus());
+                    finished = true;
                 }
             }
         } catch (Exception e) {
@@ -166,19 +184,40 @@ public class Server {
     }
 
     private void pollResult() {
-        if (results.size() == 2) {
-            System.out.println("READY");
-            try {
-                finished = true;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
-        for (Map.Entry<String, String> entry : results.entrySet()) {
-
+        if (checkResultReadiness()) {
+            double workedFor = (System.currentTimeMillis() - startMillis) / 1000.0;
+            System.out.println("Result: " + tryDoOperation());
+            System.out.println("Total time: " + workedFor + " s");
+            finished = true;
         }
     }
+
+    private boolean checkResultReadiness() {
+        String operationRes = tryDoOperation();
+        if (operationRes.equals("NaN"))
+            return false;
+        return (results.containsKey(fCode) && results.containsKey(gCode))
+                || operationRes.equals("0.0");
+    }
+
+    private String tryDoOperation() {
+        double res = 1;
+        boolean hasNaN = false;
+        for (Map.Entry<String, String> el : results.entrySet()) {
+            if (el.getValue().equals("NaN"))
+                hasNaN = true;
+            else {
+                double val = Double.parseDouble(el.getValue());
+                if (val < 1e-7)
+                    return "0.0";
+                res *= val;
+            }
+        }
+        if (Math.abs(res) > 1E-13 && hasNaN)
+            return "UNDEFINED";
+        return Double.toString(res);
+    }
+
 
     class FunctionArgs {
         public int x;
@@ -205,31 +244,40 @@ public class Server {
         }
     }
 
-//    private void startUserPrompt() {
-//        Scanner sc = new Scanner(System.in);
-//        while (currentState != Ccancel && currentState != CwithoutPrompt) {
-//            try {
-//                Thread.sleep(Settings.maxIdleTime);
-//            } catch (Exception e) {
-//                inputThread.interrupt();
-//                return;
-//            }
-//            System.out.println("Functions running for too long, options: \n" +
-//                    "continue(1)\n" +
-//                    "continue without prompt(2)\n" +
-//                    "cancel(3)");
-//            isCurrentlyPrompted = true;
-//            int code = sc.nextInt();
-//            isCurrentlyPrompted = false;
-//            code = code % 4;
-//            currentState = code;
-//        }
-//        if (currentState == Ccancel && !isResultReady) {
-//            System.out.println("User chose to cancel");
-//            printCurrentStatus();
-//            finish();
-//        }
-//    }
+    public void forceFinish() {
+        finished = true;
+    }
+
+    public String getStatus() {
+        List<String> allFunctions = new ArrayList<>() {
+            {
+                add(fCode);
+                add(gCode);
+            }
+        };
+        StringBuilder s = new StringBuilder();
+        s.append("Result can't be computed due to: \n");
+        for (String fc : allFunctions) {
+            if (!results.containsKey(fc)) {
+                s.append("   ").append(fc).append(" has not finished\n");
+            }
+        }
+        if (results.size() > 0)
+            s.append("However next functions managed to finish: \n");
+        for (Map.Entry<String, String> el : results.entrySet())
+            s.append("   ").append(el.getKey()).append(" has finished with result: ").append(el.getValue()).append("\n");
+        return s.toString();
+    }
+
+    private void startUserPrompt() {
+        System.out.println("Functions running for too long, options: \n" +
+                "continue(1)\n" +
+                "continue without prompt(2)\n" +
+                "cancel(3)");
+        int code = sc.nextInt();
+        code = code % 4;
+        currentState = code;
+    }
 }
 
 

@@ -20,7 +20,7 @@ class Runner {
             managerThread.start();
             while (!manager.isFinished()) {
                 try {
-                    Thread.sleep(20);
+                    Thread.sleep(10);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -31,7 +31,14 @@ class Runner {
     }
 
     public static void forceFinish() {
+        System.out.println(manager.getStatus());
+        manager.forceFinish();
+    }
 
+    public static boolean isActive() {
+        if (manager == null)
+            return false;
+        return manager.isActive();
     }
 
     private static void innitPromptSettings() {

@@ -13,9 +13,10 @@ public class Manager {
     private String gCode;
 
     private boolean finished = false;
-    private final Object finishMutex = new Object();
+    private boolean active = false;
 
     private Process fProcess, gProcess;
+    private Server server;
 
     public Manager(String fCode, String gCode) {
         this.fCode = fCode;
@@ -23,22 +24,23 @@ public class Manager {
     }
 
     public boolean isFinished() {
-        synchronized (finishMutex) {
-            return finished;
-        }
+        return finished;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     public void run() {
         inputX();
         try {
-            Server server = new Server(x, fCode, gCode);
+            active = true;
+            server = new Server(x, fCode, gCode);
             startProcesses(server.getPort());
             server.start();
-            // finish processes
             endProcesses();
-            synchronized (finishMutex) {
-                finished = true;
-            }
+            finished = true;
+            active = false;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -90,5 +92,15 @@ public class Manager {
         if (process.isAlive()) {
             process.destroyForcibly();
         }
+    }
+
+    public String getStatus() {
+        return server.getStatus();
+    }
+
+    public void forceFinish() {
+        server.forceFinish();
+        finished = true;
+        active = false;
     }
 }
