@@ -29,8 +29,8 @@ public class RTest implements FunctionManager {
             throw new Exception();
         }
         if (x == 7) {
-            Thread.sleep(10000);
-            return 11.0;
+            Thread.sleep(2500);
+            return 0.0;
         }
         return 1.0;
     }

@@ -113,9 +113,12 @@ public class Server {
             startMillis = System.currentTimeMillis();
             long lastTime = System.currentTimeMillis();
             while (selector.isOpen() && !finished) {
-                lastTime = doPromptIfReady(lastTime);
                 doReadSelect();
-                promptCancellationCheck();
+                pollResult();
+                if (!finished) {
+                    lastTime = doPromptIfReady(lastTime);
+                    promptCancellationCheck();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -132,8 +135,10 @@ public class Server {
         return lastTime;
     }
 
-    private void doReadSelect() throws IOException {
+    private long doReadSelect() throws IOException {
+        long delta = System.currentTimeMillis();
         selector.select(Settings.maxIdleTime);
+
         Set<SelectionKey> readyKeys = selector.selectedKeys();
         Iterator<SelectionKey> iterator = readyKeys.iterator();
         while (iterator.hasNext()) {
@@ -151,6 +156,8 @@ public class Server {
                 }
             }
         }
+
+        return System.currentTimeMillis() - delta;
     }
 
     private void promptCancellationCheck() {
@@ -178,7 +185,6 @@ public class Server {
                 if (Settings.echo)
                     System.out.println("Received " + res);
                 addResult(functionChannel.fargs.functionCode, res);
-                pollResult();
             }
         }
     }
