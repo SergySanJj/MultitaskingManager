@@ -67,6 +67,7 @@ public class Server {
         listenResults();
     }
 
+
     public int getPort() {
         return serverSocketChannel.socket().getLocalPort();
     }
@@ -104,12 +105,8 @@ public class Server {
     }
 
     private void listenResults() {
+        openSelectors();
         try {
-            selector = Selector.open();
-            for (FunctionChannel functionChannel : functionChannels) {
-                functionChannel.channel.configureBlocking(false);
-                functionChannel.channel.register(selector, OP_READ);
-            }
             startMillis = System.currentTimeMillis();
             long lastTime = System.currentTimeMillis();
             while (selector.isOpen() && !finished) {
@@ -119,6 +116,18 @@ public class Server {
                     lastTime = doPromptIfReady(lastTime);
                     promptCancellationCheck();
                 }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openSelectors() {
+        try {
+            selector = Selector.open();
+            for (FunctionChannel functionChannel : functionChannels) {
+                functionChannel.channel.configureBlocking(false);
+                functionChannel.channel.register(selector, OP_READ);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -137,6 +146,7 @@ public class Server {
 
     private long doReadSelect() throws IOException {
         long delta = System.currentTimeMillis();
+        // does not wait for idle time because channels are always ready to be read but with empty buffers
         selector.select(Settings.maxIdleTime);
 
         Set<SelectionKey> readyKeys = selector.selectedKeys();
@@ -156,8 +166,9 @@ public class Server {
                 }
             }
         }
-
-        return System.currentTimeMillis() - delta;
+        delta = System.currentTimeMillis() - delta;
+//        System.out.println(delta);
+        return delta;
     }
 
     private void promptCancellationCheck() {

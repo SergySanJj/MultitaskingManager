@@ -30,7 +30,7 @@ public class RTest implements FunctionManager {
         }
         if (x == 7) {
             Thread.sleep(2500);
-            return 0.0;
+            return 2.0;
         }
         return 1.0;
     }
