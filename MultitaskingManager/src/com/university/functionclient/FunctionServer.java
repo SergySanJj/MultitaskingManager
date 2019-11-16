@@ -40,6 +40,7 @@ public class FunctionServer {
     private void write() throws IOException {
         if (msg != null) {
             ByteBuffer buff = ByteBuffer.allocate(256);
+            buff.clear();
             CharBuffer cbuff = buff.asCharBuffer();
             cbuff.put(msg);
             cbuff.flip();

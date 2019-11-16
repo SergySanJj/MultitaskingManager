@@ -32,8 +32,9 @@ public class Server {
     private Selector selector;
     private long startMillis;
 
+    private ArrayList<SelectionKey> selectionKeys;
+
     private boolean finished = false;
-    private final Object finishMutex = new Object();
 
     private Map<String, String> results;
 
@@ -76,7 +77,7 @@ public class Server {
         serverSocketChannel.configureBlocking(true);
         while (functionChannels.size() < 2) {
             SocketChannel socketChannel = serverSocketChannel.accept();
-            socketChannel.configureBlocking(true);
+            socketChannel.configureBlocking(false);
             FunctionArgs fargs = functionArgs.pop();
             functionChannels.add(new FunctionChannel(socketChannel, fargs));
         }
@@ -105,16 +106,49 @@ public class Server {
     }
 
     private void listenResults() {
-        openSelectors();
+        setNonBlocking();
         try {
             startMillis = System.currentTimeMillis();
-            long lastTime = System.currentTimeMillis();
-            while (selector.isOpen() && !finished) {
-                doReadSelect();
+            long availableToWait = Settings.maxIdleTime;
+            while (!finished) {
+                selector = Selector.open();
+
+                registerChannels();
+
+                availableToWait = availableToWait - doReadSelect(availableToWait);
+                cancelKeys();
                 pollResult();
-                if (!finished) {
-                    lastTime = doPromptIfReady(lastTime);
+
+                if (!finished && availableToWait <= 0) {
+                    doPrompt();
                     promptCancellationCheck();
+                    availableToWait = Settings.maxIdleTime;
+                }
+
+                selector.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setNonBlocking() {
+        try {
+            for (FunctionChannel functionChannel : functionChannels) {
+                functionChannel.channel.configureBlocking(false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void registerChannels() {
+        selectionKeys = new ArrayList<>();
+        try {
+            for (FunctionChannel functionChannel : functionChannels) {
+                if (functionChannel.channel.isOpen()) {
+                    SelectionKey key = functionChannel.channel.register(selector, OP_READ);
+                    selectionKeys.add(key);
                 }
             }
         } catch (Exception e) {
@@ -122,32 +156,23 @@ public class Server {
         }
     }
 
-    private void openSelectors() {
-        try {
-            selector = Selector.open();
-            for (FunctionChannel functionChannel : functionChannels) {
-                functionChannel.channel.configureBlocking(false);
-                functionChannel.channel.register(selector, OP_READ);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+    private void cancelKeys() {
+        for (SelectionKey key : selectionKeys) {
+            key.cancel();
         }
+        selectionKeys.clear();
     }
 
-    private long doPromptIfReady(long lastTime) {
+    private void doPrompt() {
         if (Settings.usePrompts && currentState == Ccontinue) {
-            if (System.currentTimeMillis() - lastTime >= Settings.maxIdleTime) {
-                startUserPrompt();
-                lastTime = System.currentTimeMillis();
-            }
+            startUserPrompt();
         }
-        return lastTime;
     }
 
-    private long doReadSelect() throws IOException {
+    private long doReadSelect(long idle) throws IOException {
         long delta = System.currentTimeMillis();
         // does not wait for idle time because channels are always ready to be read but with empty buffers
-        selector.select(Settings.maxIdleTime);
+        selector.select(idle);
 
         Set<SelectionKey> readyKeys = selector.selectedKeys();
         Iterator<SelectionKey> iterator = readyKeys.iterator();
@@ -167,7 +192,6 @@ public class Server {
             }
         }
         delta = System.currentTimeMillis() - delta;
-//        System.out.println(delta);
         return delta;
     }
 
@@ -198,6 +222,8 @@ public class Server {
                 addResult(functionChannel.fargs.functionCode, res);
             }
         }
+        key.channel().close();
+        key.cancel();
     }
 
     private void addResult(String functionCode, String result) {

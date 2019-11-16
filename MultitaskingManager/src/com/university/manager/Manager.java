@@ -46,11 +46,14 @@ public class Manager {
         }
     }
 
+    // nik guaranteed
+    // me fair share (время между группами, и внутри группы, процессы равноприоритетны, для каждой группы свой квант)
+
     private void inputX() {
         boolean inputted = false;
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter x:");
-        do {
+        while (!inputted) {
             try {
                 String str = sc.next();
                 x = Integer.parseInt(str);
@@ -58,7 +61,7 @@ public class Manager {
             } catch (Exception e) {
                 System.out.println("x must be an int value");
             }
-        } while (!inputted);
+        }
     }
 
     private void startProcesses(int port) throws Exception {
