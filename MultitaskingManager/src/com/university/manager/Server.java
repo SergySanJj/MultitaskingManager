@@ -113,8 +113,9 @@ public class Server {
             startMillis = System.currentTimeMillis();
             long lastTime = System.currentTimeMillis();
             while (selector.isOpen() && !finished) {
-                lastTime = doPromptIfReady(lastTime);
                 doReadSelect();
+                lastTime = doPromptIfReady(lastTime);
+
                 promptCancellationCheck();
             }
         } catch (Exception e) {
@@ -293,6 +294,7 @@ public class Server {
         int code = sc.nextInt();
         code = code % 4;
         currentState = code;
+
     }
 }
 
